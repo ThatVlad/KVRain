@@ -13,8 +13,6 @@ import org10x10.dam.game.Move;
  *
  * @author huub
  */
-// ToDo: rename this class (and hence this file) to have a distinct name
-//       for your player during the tournament
 public class MagnusCarlsen extends DraughtsPlayer {
 
     private int bestValue = 0;
@@ -140,6 +138,7 @@ public class MagnusCarlsen extends DraughtsPlayer {
             throw new AIStoppedException();
         }
         DraughtsState state = node.getState();
+        
         // ToDo: write an alphabeta search to compute bestMove and value
         Move bestMove = state.getMoves().get(0);
         int value = 0;
@@ -154,6 +153,7 @@ public class MagnusCarlsen extends DraughtsPlayer {
             throw new AIStoppedException();
         }
         DraughtsState state = node.getState();
+        
         // ToDo: write an alphabeta search to compute bestMove and value
         Move bestMove = state.getMoves().get(0);
         int value = 0;
