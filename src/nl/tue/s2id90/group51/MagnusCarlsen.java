@@ -2,6 +2,8 @@ package nl.tue.s2id90.group51;
 
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.MIN_VALUE;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import nl.tue.s2id90.draughts.DraughtsState;
@@ -16,6 +18,8 @@ import org10x10.dam.game.Move;
 public class MagnusCarlsen extends DraughtsPlayer {
 
     private int bestValue = 0;
+    private List<Move> moveList;
+    private List<Move> oldMoveList;
     int maxSearchDepth;
     AlphaBeta alphaBeta;
 
@@ -27,6 +31,7 @@ public class MagnusCarlsen extends DraughtsPlayer {
     public MagnusCarlsen(int maxSearchDepth) {
         super("best.png"); // ToDo: replace with your own icon
         this.maxSearchDepth = maxSearchDepth;
+        this.oldMoveList = new ArrayList<Move>();
         this.alphaBeta = new AlphaBeta(this);
     }
 
@@ -36,13 +41,20 @@ public class MagnusCarlsen extends DraughtsPlayer {
         bestValue = 0;
         DraughtsNode node = new DraughtsNode(s);    // the root of the search tree
         try {
+            // create new moveList to store the path to the optimal solution
+            // evaluating this path first is good for pruning
+            moveList = new ArrayList<Move>();
+            
             // compute bestMove and bestValue in a call to alphabeta
-            bestValue = alphaBeta(node, MIN_VALUE, MAX_VALUE, maxSearchDepth);
-
+            bestValue = alphaBeta(node, MIN_VALUE, MAX_VALUE, maxSearchDepth, moveList, oldMoveList);
+            
             // store the bestMove found uptill now
             // NB this is not done in case of an AIStoppedException in alphaBeat()
             bestMove = node.getBestMove();
 
+            // oldMoveList has served its purpose, it may now be overwritten
+            oldMoveList = moveList;
+            
             // print the results for debugging reasons
             System.err.format(
                     "%s: depth= %2d, best move = %5s, value=%d\n",
@@ -102,31 +114,25 @@ public class MagnusCarlsen extends DraughtsPlayer {
      * @throws AIStoppedException
      *
      */
-    int alphaBeta(DraughtsNode node, int alpha, int beta, int depth)
+    int alphaBeta(DraughtsNode node, int alpha, int beta, int depth, List<Move> moveList, List<Move> oldMoveList)
             throws AIStoppedException {
-        if (node.getState().isWhiteToMove()) {
+        //iterative deepening
+        int returnValue = 0;
+        for (int i = 1; i <= depth; i++) {
             if (stopped) {
                 stopped = false;
                 throw new AIStoppedException();
             }
-            //iterative deepening
-            int returnValue = 0;
-            for (int i = 1; i <= depth; i++) {
-                returnValue = alphaBeta.alphaBetaMax(node, alpha, beta, depth);
+            ArrayList<Move> depthMoveList = new ArrayList<>();
+            if (node.getState().isWhiteToMove()) {
+                returnValue = alphaBeta.alphaBetaMax(node, alpha, beta, i, depthMoveList, oldMoveList);
+            } else {
+                returnValue = alphaBeta.alphaBetaMin(node, alpha, beta, i, depthMoveList, oldMoveList);
             }
-            return returnValue;
-            
-        } else {
-            if (stopped) {
-                stopped = false;
-                throw new AIStoppedException();
-            }
-            int returnValue = 0;
-            for (int i = 1; i <= depth; i++) {
-                returnValue = alphaBeta.alphaBetaMin(node, alpha, beta, depth);
-            }
-            return returnValue;
+            Collections.reverse(depthMoveList);
+            moveList = depthMoveList;
         }
+        return returnValue;
     }
 
     /**
