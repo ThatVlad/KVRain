@@ -67,10 +67,13 @@ public class AlphaBeta {
         for (Move move : moves) {
             currState.doMove(move);
             DraughtsNode childNode = new DraughtsNode(currState);
-            alpha = Math.max(alpha, alphaBetaMax(childNode, alpha, beta, depth - 1));
-            if (alpha >= beta) {
+            int result = alphaBetaMax(childNode, alpha, beta, depth - 1);
+            if (result > alpha) {
+                alpha = result;
                 node.setBestMove(move);
-                return beta;
+            }
+            if (alpha >= beta) {
+                return alpha;
             }
             currState.undoMove(move);
         }
@@ -100,10 +103,13 @@ public class AlphaBeta {
         for (Move move : moves) {
             currState.doMove(move);
             DraughtsNode childNode = new DraughtsNode(currState);
-            beta = Math.min(beta, alphaBetaMax(childNode, alpha, beta, depth - 1));
-            if (alpha >= beta) {
+            int result = alphaBetaMax(childNode, alpha, beta, depth - 1);
+            if (result < beta) {
+                beta = result;
                 node.setBestMove(move);
-                return alpha;
+            }
+            if (alpha >= beta) {
+                return beta;
             }
             currState.undoMove(move);
         }
