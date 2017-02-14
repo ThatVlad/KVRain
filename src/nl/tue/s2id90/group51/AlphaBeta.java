@@ -5,6 +5,7 @@
  */
 package nl.tue.s2id90.group51;
 
+import java.util.ArrayList;
 import java.util.List;
 import nl.tue.s2id90.draughts.DraughtsState;
 import org10x10.dam.game.Move;
@@ -45,7 +46,7 @@ public class AlphaBeta {
         this.player = player;
     }
 
-    public int alphaBetaMin(DraughtsNode node, int alpha, int beta, int depth)
+    public int alphaBetaMin(DraughtsNode node, int alpha, int beta, int depth, List<Move> moveList, List<Move> oldMoveList)
             throws AIStoppedException {
         // throw an exception if our player is forced to stop
         if (player.stopped) {
@@ -63,25 +64,48 @@ public class AlphaBeta {
         // if not final depth, then generate all possible branches
         // determine the best move and corresponding state-value
         List<Move> moves = currState.getMoves();
+        // if the list of old-moves is not empty yet, then continue
+        // tracing the best move of the previous run by putting the old move
+        // in the first position to be evaluated.
+        // This leads to better pruning.
+        if (!oldMoveList.isEmpty()) {
+            Move oldMove = oldMoveList.remove(0);
+            for (Move move : moves) {
+                if (move.equals(oldMove)) {
+                    Move temp = moves.get(0);
+                    moves.set(0, move);
+                    move = temp;
+                    break;
+                }
+            }
+        }
+        // keep track of the moveList of the best move
+        // combine it with the input moveList to get full move-history
+        List<Move> bestMoveList = null;
         //access via new for-loop
         for (Move move : moves) {
             currState.doMove(move);
             DraughtsNode childNode = new DraughtsNode(currState);
-            int result = alphaBetaMax(childNode, alpha, beta, depth - 1);
+            List<Move> childMoveList = new ArrayList<Move>();
+            int result = alphaBetaMax(childNode, alpha, beta, depth - 1, childMoveList, oldMoveList);
             if (result > alpha) {
                 alpha = result;
                 node.setBestMove(move);
+                bestMoveList = childMoveList;
             }
             if (alpha >= beta) {
+                // append child move list to move list
+                moveList.addAll(bestMoveList);
                 return alpha;
             }
             currState.undoMove(move);
         }
+        // append child move list to move list
+        moveList.addAll(bestMoveList);
         return alpha;
     }
 
-    // CURRENTLY HAS BODY OF MIN COPY-PASTED, UPDATE!
-    public int alphaBetaMax(DraughtsNode node, int alpha, int beta, int depth)
+    public int alphaBetaMax(DraughtsNode node, int alpha, int beta, int depth, List<Move> moveList, List<Move> oldMoveList)
             throws AIStoppedException {
         // throw an exception if our player is forced to stop
         if (player.stopped) {
@@ -99,20 +123,43 @@ public class AlphaBeta {
         // if not final depth, then generate all possible branches
         // determine the best move and corresponding state-value
         List<Move> moves = currState.getMoves();
+        // if the list of old-moves is not empty yet, then continue
+        // tracing the best move of the previous run by putting the old move
+        // in the first position to be evaluated.
+        // This leads to better pruning.
+        if (!oldMoveList.isEmpty()) {
+            Move oldMove = oldMoveList.remove(0);
+            for (Move move : moves) {
+                if (move.equals(oldMove)) {
+                    Move temp = moves.get(0);
+                    moves.set(0, move);
+                    move = temp;
+                    break;
+                }
+            }
+        }
+        // keep track of the moveList of the best move
+        // combine it with the input moveList to get full move-history
+        List<Move> bestMoveList = null;
         //access via new for-loop
         for (Move move : moves) {
             currState.doMove(move);
             DraughtsNode childNode = new DraughtsNode(currState);
-            int result = alphaBetaMax(childNode, alpha, beta, depth - 1);
+            List<Move> childMoveList = new ArrayList<Move>();
+            int result = alphaBetaMin(childNode, alpha, beta, depth - 1, childMoveList, oldMoveList);
             if (result < beta) {
                 beta = result;
-                node.setBestMove(move);
+                bestMoveList = childMoveList;
             }
             if (alpha >= beta) {
+                // append child move list to move list
+                moveList.addAll(bestMoveList);
                 return beta;
             }
             currState.undoMove(move);
         }
+        // append child move list to move list
+        moveList.addAll(bestMoveList);
         return beta;
     }
 
