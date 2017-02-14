@@ -17,15 +17,17 @@ public class MagnusCarlsen extends DraughtsPlayer {
 
     private int bestValue = 0;
     int maxSearchDepth;
+    AlphaBeta alphaBeta;
 
     /**
      * boolean that indicates that the GUI asked the player to stop thinking.
      */
-    private boolean stopped;
+    public boolean stopped;
 
     public MagnusCarlsen(int maxSearchDepth) {
         super("best.png"); // ToDo: replace with your own icon
         this.maxSearchDepth = maxSearchDepth;
+        this.alphaBeta = new AlphaBeta(this);
     }
 
     @Override
@@ -71,7 +73,7 @@ public class MagnusCarlsen extends DraughtsPlayer {
     /**
      * Tries to make alphabeta search stop. Search should be implemented such
      * that it throws an AIStoppedException when boolean stopped is set to true;
-    *
+     *
      */
     @Override
     public void stop() {
@@ -103,62 +105,18 @@ public class MagnusCarlsen extends DraughtsPlayer {
     int alphaBeta(DraughtsNode node, int alpha, int beta, int depth)
             throws AIStoppedException {
         if (node.getState().isWhiteToMove()) {
-            return alphaBetaMax(node, alpha, beta, depth);
+            if (stopped) {
+                stopped = false;
+                throw new AIStoppedException();
+            }
+            return alphaBeta.alphaBetaMax(node, alpha, beta, depth);
         } else {
-            return alphaBetaMin(node, alpha, beta, depth);
+            if (stopped) {
+                stopped = false;
+                throw new AIStoppedException();
+            }
+            return alphaBeta.alphaBetaMin(node, alpha, beta, depth);
         }
-    }
-
-    /**
-     * Does an alphabeta computation with the given alpha and beta where the
-     * player that is to move in node is the minimizing player.
-     *
-     * <p>
-     * Typical pieces of code used in this method are:
-     * <ul> <li><code>DraughtsState state = node.getState()</code>.</li>
-     * <li><code> state.doMove(move); .... ; state.undoMove(move);</code></li>
-     * <li><code>node.setBestMove(bestMove);</code></li>
-     * <li><code>if(stopped) { stopped=false; throw new AIStoppedException(); }</code></li>
-     * </ul>
-     * </p>
-     *
-     * @param node contains DraughtsState and has field to which the best move
-     * can be assigned.
-     * @param alpha
-     * @param beta
-     * @param depth maximum recursion Depth
-     * @return the compute value of this node
-     * @throws AIStoppedException thrown whenever the boolean stopped has been
-     * set to true.
-     */
-    int alphaBetaMin(DraughtsNode node, int alpha, int beta, int depth)
-            throws AIStoppedException {
-        if (stopped) {
-            stopped = false;
-            throw new AIStoppedException();
-        }
-        DraughtsState state = node.getState();
-        
-        // ToDo: write an alphabeta search to compute bestMove and value
-        Move bestMove = state.getMoves().get(0);
-        int value = 0;
-        node.setBestMove(bestMove);
-        return value;
-    }
-
-    int alphaBetaMax(DraughtsNode node, int alpha, int beta, int depth)
-            throws AIStoppedException {
-        if (stopped) {
-            stopped = false;
-            throw new AIStoppedException();
-        }
-        DraughtsState state = node.getState();
-        
-        // ToDo: write an alphabeta search to compute bestMove and value
-        Move bestMove = state.getMoves().get(0);
-        int value = 0;
-        node.setBestMove(bestMove);
-        return value;
     }
 
     /**
