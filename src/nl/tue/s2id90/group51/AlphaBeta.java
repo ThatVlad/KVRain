@@ -45,8 +45,8 @@ public class AlphaBeta {
         this.player = player;
     }
 
-    public int alphaBetaMin(DraughtsNode node, int alpha, int beta, int depth)
-            throws AIStoppedException {
+    public int alphaBetaMin(DraughtsNode node, Move previousBestMove, 
+            int alpha, int beta, int depth) throws AIStoppedException {
         // throw an exception if our player is forced to stop
         if (player.stopped) {
             player.stopped = false;
@@ -67,7 +67,7 @@ public class AlphaBeta {
         for (Move move : moves) {
             currState.doMove(move);
             DraughtsNode childNode = new DraughtsNode(currState);
-            alpha = Math.max(alpha, alphaBetaMax(childNode, alpha, beta, depth - 1));
+            alpha = Math.max(alpha, alphaBetaMax(childNode, null, alpha, beta, depth - 1));
             if (alpha >= beta) {
                 node.setBestMove(move);
                 return beta;
@@ -78,8 +78,8 @@ public class AlphaBeta {
     }
 
     // CURRENTLY HAS BODY OF MIN COPY-PASTED, UPDATE!
-    public int alphaBetaMax(DraughtsNode node, int alpha, int beta, int depth)
-            throws AIStoppedException {
+    public int alphaBetaMax(DraughtsNode node, Move previousBestMove, 
+            int alpha, int beta, int depth) throws AIStoppedException {
         // throw an exception if our player is forced to stop
         if (player.stopped) {
             player.stopped = false;
@@ -100,7 +100,7 @@ public class AlphaBeta {
         for (Move move : moves) {
             currState.doMove(move);
             DraughtsNode childNode = new DraughtsNode(currState);
-            beta = Math.min(beta, alphaBetaMax(childNode, alpha, beta, depth - 1));
+            beta = Math.min(beta, alphaBetaMax(childNode, null, alpha, beta, depth - 1));
             if (alpha >= beta) {
                 node.setBestMove(move);
                 return alpha;

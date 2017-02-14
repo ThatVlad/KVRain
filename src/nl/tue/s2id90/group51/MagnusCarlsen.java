@@ -109,13 +109,23 @@ public class MagnusCarlsen extends DraughtsPlayer {
                 stopped = false;
                 throw new AIStoppedException();
             }
-            return alphaBeta.alphaBetaMax(node, alpha, beta, depth);
+            //iterative deepening
+            int returnValue = 0;
+            for (int i = 1; i <= depth; i++) {
+                returnValue = alphaBeta.alphaBetaMax(node, node.getBestMove(), alpha, beta, depth);
+            }
+            return returnValue;
+            
         } else {
             if (stopped) {
                 stopped = false;
                 throw new AIStoppedException();
             }
-            return alphaBeta.alphaBetaMin(node, alpha, beta, depth);
+            int returnValue = 0;
+            for (int i = 1; i <= depth; i++) {
+                returnValue = alphaBeta.alphaBetaMin(node, node.getBestMove(), alpha, beta, depth);
+            }
+            return returnValue;
         }
     }
 
