@@ -18,8 +18,6 @@ import org10x10.dam.game.Move;
 public class MagnusCarlsen extends DraughtsPlayer {
 
     private int bestValue = 0;
-    private List<Move> moveList;
-    private List<Move> oldMoveList;
     int maxSearchDepth;
     AlphaBeta alphaBeta;
 
@@ -31,7 +29,6 @@ public class MagnusCarlsen extends DraughtsPlayer {
     public MagnusCarlsen(int maxSearchDepth) {
         super("best.png"); // ToDo: replace with your own icon
         this.maxSearchDepth = maxSearchDepth;
-        this.oldMoveList = new ArrayList<Move>();
         this.alphaBeta = new AlphaBeta(this);
     }
 
@@ -40,20 +37,13 @@ public class MagnusCarlsen extends DraughtsPlayer {
         Move bestMove = null;
         bestValue = 0;
         DraughtsNode node = new DraughtsNode(s);    // the root of the search tree
-        try {
-            // create new moveList to store the path to the optimal solution
-            // evaluating this path first is good for pruning
-            moveList = new ArrayList<Move>();
-            
+        try {        
             // compute bestMove and bestValue in a call to alphabeta
-            bestValue = alphaBeta(node, MIN_VALUE, MAX_VALUE, maxSearchDepth, moveList, oldMoveList);
+            bestValue = alphaBeta(node, MIN_VALUE, MAX_VALUE, maxSearchDepth);
             
             // store the bestMove found uptill now
             // NB this is not done in case of an AIStoppedException in alphaBeat()
             bestMove = node.getBestMove();
-
-            // oldMoveList has served its purpose, it may now be overwritten
-            oldMoveList = moveList;
             
             // print the results for debugging reasons
             System.err.format(
@@ -114,10 +104,11 @@ public class MagnusCarlsen extends DraughtsPlayer {
      * @throws AIStoppedException
      *
      */
-    int alphaBeta(DraughtsNode node, int alpha, int beta, int depth, List<Move> moveList, List<Move> oldMoveList)
+    int alphaBeta(DraughtsNode node, int alpha, int beta, int depth)
             throws AIStoppedException {
         //iterative deepening
         int returnValue = 0;
+        List<Move> oldMoveList = new ArrayList<Move>();
         for (int i = 1; i <= depth; i++) {
             if (stopped) {
                 stopped = false;
@@ -130,7 +121,7 @@ public class MagnusCarlsen extends DraughtsPlayer {
                 returnValue = alphaBeta.alphaBetaMin(node, alpha, beta, i, depthMoveList, oldMoveList);
             }
             Collections.reverse(depthMoveList);
-            moveList = depthMoveList;
+            oldMoveList = depthMoveList;
         }
         return returnValue;
     }
