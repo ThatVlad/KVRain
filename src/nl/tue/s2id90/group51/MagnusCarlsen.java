@@ -20,6 +20,7 @@ public class MagnusCarlsen extends DraughtsPlayer {
     private int bestValue = 0;
     int maxSearchDepth;
     AlphaBeta alphaBeta;
+    Evaluate evaluate;
 
     /**
      * boolean that indicates that the GUI asked the player to stop thinking.
@@ -29,7 +30,8 @@ public class MagnusCarlsen extends DraughtsPlayer {
     public MagnusCarlsen(int maxSearchDepth) {
         super("best.png"); // ToDo: replace with your own icon
         this.maxSearchDepth = maxSearchDepth;
-        this.alphaBeta = new AlphaBeta(this);
+        this.evaluate = new Evaluate(this);
+        this.alphaBeta = new AlphaBeta(this, evaluate);
     }
 
     @Override
@@ -51,7 +53,9 @@ public class MagnusCarlsen extends DraughtsPlayer {
                     this.getClass().getSimpleName(), maxSearchDepth, bestMove, bestValue
             );
         } catch (AIStoppedException ex) {
-            /* nothing to do */        }
+            /* nothing to do */
+            bestMove = node.getBestMove();
+        }
 
         if (bestMove == null) {
             System.err.println("no valid move found!");
@@ -114,7 +118,7 @@ public class MagnusCarlsen extends DraughtsPlayer {
                 stopped = false;
                 throw new AIStoppedException();
             }
-            ArrayList<Move> depthMoveList = new ArrayList<>();
+            ArrayList<Move> depthMoveList = new ArrayList<Move>();
             if (node.getState().isWhiteToMove()) {
                 returnValue = alphaBeta.alphaBetaMax(node, alpha, beta, i, depthMoveList, oldMoveList);
             } else {
@@ -131,6 +135,6 @@ public class MagnusCarlsen extends DraughtsPlayer {
      */
     // ToDo: write an appropriate evaluation function
     int evaluate(DraughtsState state) {
-        return 0;
+        return evaluate.evaluateState(state);
     }
 }

@@ -19,6 +19,7 @@ public class AlphaBeta {
     // reference to the player who created this AlphaBeta
     // necessary to check whether we are ordered to stop (with player.stopped)
     MagnusCarlsen player;
+    Evaluate evaluate;
 
     /**
      * Does an alphabeta computation with the given alpha and beta where the
@@ -42,8 +43,9 @@ public class AlphaBeta {
      * @throws AIStoppedException thrown whenever the boolean stopped has been
      * set to true.
      */
-    public AlphaBeta(MagnusCarlsen player) {
+    public AlphaBeta(MagnusCarlsen player, Evaluate evaluate) {
         this.player = player;
+        this.evaluate = evaluate;
     }
 
     public int alphaBetaMin(DraughtsNode node, int alpha, int beta, int depth, List<Move> moveList, List<Move> oldMoveList)
@@ -58,7 +60,7 @@ public class AlphaBeta {
         DraughtsState currState = node.getState();
         // if final depth reached, then return the value of this leaf
         if (depth <= 0) {
-            return 0; // PLACEHOLDER, actually return the VALUE of currState
+            return evaluate.evaluateState(currState);
         }
         
         // if not final depth, then generate all possible branches
@@ -117,7 +119,7 @@ public class AlphaBeta {
         DraughtsState currState = node.getState();
         // if final depth reached, then return the value of this leaf
         if (depth <= 0) {
-            return 0; // PLACEHOLDER, actually return the VALUE of currState
+            return evaluate.evaluateState(currState);
         }
         
         // if not final depth, then generate all possible branches

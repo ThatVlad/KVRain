@@ -110,7 +110,7 @@ public class Evaluate {
             
             
             // Check for possible moves
-            int movableScore = calculateMovableScore(pieces, position, white);
+            int movableScore = 0;
             if (movableScore != 0) {
                 if (white) {
                     movableScoreWhite += movableScore;
