@@ -66,7 +66,13 @@ public class Evaluate {
         21, 33
     };
     
-    
+    /**
+     * Evaluates the state.
+     * 
+     * @param state
+     *          The state to be checked
+     * @return Score of the state
+     */
     public int evaluateState(DraughtsState state) {
         int score = 0;
         
@@ -86,14 +92,14 @@ public class Evaluate {
             boolean white = true;
             
             // Check piece type for score
-            if (piece == 1) {
+            if (piece == DraughtsState.WHITEPIECE) {
                 pieceScoreWhite += MAN_SCORE;
-            } else if (piece == 2) {
+            } else if (piece == DraughtsState.BLACKPIECE) {
                 white = false;
                 pieceScoreBlack += MAN_SCORE;
-            } else if (piece == 3) {
+            } else if (piece == DraughtsState.WHITEKING) {
                 pieceScoreWhite += KING_SCORE;
-            } else if (piece == 4) {
+            } else if (piece == DraughtsState.BLACKKING) {
                 white = false;
                 pieceScoreBlack += KING_SCORE;
             }
@@ -110,7 +116,7 @@ public class Evaluate {
             
             
             // Check for possible moves
-            int movableScore = 0;
+            int movableScore = calculateMovableScore(pieces, position, white);
             if (movableScore != 0) {
                 if (white) {
                     movableScoreWhite += movableScore;
@@ -128,6 +134,9 @@ public class Evaluate {
         return score;
     }
     
+    /**
+     * Calculates the score for the position of the pieces
+     */
     private int calculatePositionScore(int position) {
         for (int i = 0; i < SCORE4_POSITIONS.length; i++) {
             if (SCORE4_POSITIONS[i] == position) {
@@ -160,6 +169,9 @@ public class Evaluate {
         return 0;
     }
     
+    /**
+     * Calculates the score for the number of moves that can be done
+     */
     private int calculateMovableScore(int[] pieces, int position, boolean white) {
         int movableScore = 0;
         boolean checked = false;
@@ -178,8 +190,16 @@ public class Evaluate {
         }
 
         if (!checked) {
-            int possibleMove1 = pieces[position - 5];
-            int possibleMove2 = pieces[position - 6];
+            int move1 = 5;
+            int move2 = 6;
+            
+            if (!white) {
+                move1 *= -1;
+                move2 *= -1;
+            }
+            
+            int possibleMove1 = pieces[position - move1];
+            int possibleMove2 = pieces[position - move2];
             if (possibleMove1 == 0) {
                 movableScore += MOVABLE_SCORE;
             }
@@ -189,6 +209,37 @@ public class Evaluate {
         }
         
         return movableScore;
+    }
+    
+    private boolean isMovePossible(int[] pieces, int position, int move, boolean white) {
+        int newPosition = pieces[move];
+        
+        // Empty space
+        if (newPosition == DraughtsState.EMPTY) {
+            return true;
+        }
+        
+        boolean canJump = false;
+        
+        // Check if new position is occupied by enemy piece
+        if (white) {
+            if (newPosition == DraughtsState.BLACKPIECE || newPosition == DraughtsState.BLACKKING) {
+                canJump = true;
+            }
+        } else {
+            if (newPosition == DraughtsState.WHITEPIECE || newPosition == DraughtsState.WHITEKING) {
+                canJump = true;
+            }
+        }
+        
+        if (!canJump) {
+            return false;
+        }
+        
+        
+        
+        
+        return false;
     }
     
     /*
