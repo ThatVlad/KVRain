@@ -20,6 +20,7 @@ public class AlphaBeta {
     // necessary to check whether we are ordered to stop (with player.stopped)
     MagnusCarlsen player;
     Evaluate evaluate;
+    int statesSearched;
 
     /**
      * Does an alphabeta computation with the given alpha and beta where the
@@ -86,6 +87,7 @@ public class AlphaBeta {
         List<Move> bestMoveList = new ArrayList<>();
         //access via new for-loop
         for (Move move : moves) {
+            statesSearched++;
             currState.doMove(move);
             DraughtsNode childNode = new DraughtsNode(currState);
             List<Move> childMoveList = new ArrayList<Move>();
@@ -146,6 +148,7 @@ public class AlphaBeta {
         List<Move> bestMoveList = new ArrayList<>();
         //access via new for-loop
         for (Move move : moves) {
+            statesSearched++;
             currState.doMove(move);
             DraughtsNode childNode = new DraughtsNode(currState);
             List<Move> childMoveList = new ArrayList<Move>();
