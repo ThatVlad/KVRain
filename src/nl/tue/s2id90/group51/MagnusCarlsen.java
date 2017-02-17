@@ -18,6 +18,7 @@ import org10x10.dam.game.Move;
 public class MagnusCarlsen extends DraughtsPlayer {
 
     private int bestValue = 0;
+    int depthReached = 0;
     int maxSearchDepth;
     AlphaBeta alphaBeta;
     Evaluate evaluate;
@@ -48,7 +49,8 @@ public class MagnusCarlsen extends DraughtsPlayer {
         } catch (AIStoppedException ex) {
             System.err.println("AIStoppedException caught!"); 
         } finally {
-            System.err.println("Entered finally"); 
+            System.err.println("Entered finally");
+            System.err.println("Max depth searched: " + depthReached);
             // store the bestMove found uptill now
             // NB this is not done in case of an AIStoppedException in alphaBeat()
             bestMove = node.getBestMove();
@@ -127,6 +129,8 @@ public class MagnusCarlsen extends DraughtsPlayer {
             } else {
                 returnValue = alphaBeta.alphaBetaMin(node, alpha, beta, i, depthMoveList, oldMoveList);
             }
+            bestValue = returnValue;
+            depthReached = i;
             Collections.reverse(depthMoveList);
             oldMoveList = depthMoveList;
         }

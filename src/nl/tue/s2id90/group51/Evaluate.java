@@ -199,13 +199,13 @@ public class Evaluate {
             }
             
             int possibleMove1 = pieces[position - move1];
-            int possibleMove2 = pieces[position - move2];
+            //int possibleMove2 = pieces[position - move2];
             if (possibleMove1 == 0) {
                 movableScore += MOVABLE_SCORE;
             }
-            if (possibleMove2 == 0) {
-                movableScore += MOVABLE_SCORE;
-            }
+            //if (possibleMove2 == 0) {
+              //  movableScore += MOVABLE_SCORE;
+            //}
         }
         
         return movableScore;
