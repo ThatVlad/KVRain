@@ -83,7 +83,7 @@ public class AlphaBeta {
         }
         // keep track of the moveList of the best move
         // combine it with the input moveList to get full move-history
-        List<Move> bestMoveList = null;
+        List<Move> bestMoveList = new ArrayList<>();
         //access via new for-loop
         for (Move move : moves) {
             currState.doMove(move);
@@ -98,6 +98,7 @@ public class AlphaBeta {
             if (alpha >= beta) {
                 // append child move list to move list
                 moveList.addAll(bestMoveList);
+                currState.undoMove(move);
                 return alpha;
             }
             currState.undoMove(move);
@@ -142,7 +143,7 @@ public class AlphaBeta {
         }
         // keep track of the moveList of the best move
         // combine it with the input moveList to get full move-history
-        List<Move> bestMoveList = null;
+        List<Move> bestMoveList = new ArrayList<>();
         //access via new for-loop
         for (Move move : moves) {
             currState.doMove(move);
@@ -151,11 +152,13 @@ public class AlphaBeta {
             int result = alphaBetaMin(childNode, alpha, beta, depth - 1, childMoveList, oldMoveList);
             if (result < beta) {
                 beta = result;
+                node.setBestMove(move);
                 bestMoveList = childMoveList;
             }
             if (alpha >= beta) {
                 // append child move list to move list
                 moveList.addAll(bestMoveList);
+                currState.undoMove(move);
                 return beta;
             }
             currState.undoMove(move);

@@ -36,13 +36,19 @@ public class MagnusCarlsen extends DraughtsPlayer {
 
     @Override
     public Move getMove(DraughtsState s) {
+        System.err.println("Entering getMove()");
         Move bestMove = null;
         bestValue = 0;
+        
         DraughtsNode node = new DraughtsNode(s);    // the root of the search tree
         try {        
             // compute bestMove and bestValue in a call to alphabeta
             bestValue = alphaBeta(node, MIN_VALUE, MAX_VALUE, maxSearchDepth);
-            
+            System.err.println("bestValue computed!");
+        } catch (AIStoppedException ex) {
+            System.err.println("AIStoppedException caught!"); 
+        } finally {
+            System.err.println("Entered finally"); 
             // store the bestMove found uptill now
             // NB this is not done in case of an AIStoppedException in alphaBeat()
             bestMove = node.getBestMove();
@@ -52,11 +58,8 @@ public class MagnusCarlsen extends DraughtsPlayer {
                     "%s: depth= %2d, best move = %5s, value=%d\n",
                     this.getClass().getSimpleName(), maxSearchDepth, bestMove, bestValue
             );
-        } catch (AIStoppedException ex) {
-            /* nothing to do */
-            bestMove = node.getBestMove();
         }
-
+        
         if (bestMove == null) {
             System.err.println("no valid move found!");
             return getRandomValidMove(s);
