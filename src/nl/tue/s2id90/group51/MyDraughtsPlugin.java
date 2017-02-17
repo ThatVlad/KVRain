@@ -6,6 +6,7 @@ import nl.tue.s2id90.group51.samples.BuggyPlayer;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 import nl.tue.s2id90.draughts.DraughtsPlayerProvider;
 import nl.tue.s2id90.draughts.DraughtsPlugin;
+import nl.tue.s2id90.group51.samples.testplayer.CarlsenJr;
 
 
 
@@ -20,10 +21,11 @@ public class MyDraughtsPlugin extends DraughtsPlayerProvider implements Draughts
         // During the final competition you should make only your 
         // best player available. For testing it might be handy
         // to make more than one player available.
-        super(new MagnusCarlsen(10),
+        super(new MagnusCarlsen(20),
                 new UninformedPlayer(),
                 new OptimisticPlayer(),
-                new BuggyPlayer()
+                new BuggyPlayer(),
+                new CarlsenJr(20)
         );
     }
 }
