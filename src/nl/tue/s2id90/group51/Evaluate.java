@@ -20,8 +20,8 @@ public class Evaluate {
         this.player = player;
     }
     
-    private static final int MAN_SCORE = 3;
-    private static final int KING_SCORE = 10;
+    private static final int MAN_SCORE = 8;
+    private static final int KING_SCORE = 25;
     private static final int MOVABLE_SCORE = 1;
     
     private static final int[] LEFT_BORDER = new int[] {
@@ -166,7 +166,7 @@ public class Evaluate {
     private int calculatePositionScore(int position) {
         for (int i = 0; i < SCORE4_POSITIONS.length; i++) {
             if (SCORE4_POSITIONS[i] == position) {
-                return 4;
+                return 2;
             }
 
             if (i < SCORE3_POSITIONS.length) {
@@ -179,7 +179,7 @@ public class Evaluate {
 
             if (i < SCORE2_POSITIONS.length) {
                 if (SCORE2_POSITIONS[i] == position) {
-                    return 2;
+                    return 3;
                 }
             } else {
                 break;
@@ -187,7 +187,7 @@ public class Evaluate {
 
             if (i < SCORE1_POSITIONS.length) {
                 if (SCORE1_POSITIONS[i] == position) {
-                    return 1;
+                    return 4;
                 }
             }
         }
