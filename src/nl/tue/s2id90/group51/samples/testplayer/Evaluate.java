@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package nl.tue.s2id90.group51;
+package nl.tue.s2id90.group51.samples.testplayer;
 
+import nl.tue.s2id90.group51.*;
 import nl.tue.s2id90.draughts.DraughtsState;
 import nl.tue.s2id90.draughts.player.DraughtsPlayer;
 
@@ -20,7 +21,7 @@ public class Evaluate {
         this.player = player;
     }
     
-    private static final int MAN_SCORE = 3;
+    private static final int MAN_SCORE = 5;
     private static final int KING_SCORE = 15;
     private static final int MOVABLE_SCORE = 1;
     
@@ -129,6 +130,7 @@ public class Evaluate {
                     return -123456789;
                 }
             }
+        
             
             // Check position for score
             int positionScore = calculatePositionScore(position);
