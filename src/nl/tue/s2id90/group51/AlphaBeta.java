@@ -92,6 +92,7 @@ public class AlphaBeta {
             DraughtsNode childNode = new DraughtsNode(currState);
             List<Move> childMoveList = new ArrayList<Move>();
             int result = alphaBetaMin(childNode, alpha, beta, depth - 1, childMoveList, oldMoveList);
+            currState.undoMove(move);
             if (result > alpha) {
                 alpha = result;
                 node.setBestMove(move);
@@ -100,10 +101,8 @@ public class AlphaBeta {
             if (alpha >= beta) {
                 // append child move list to move list
                 moveList.addAll(bestMoveList);
-                currState.undoMove(move);
                 return alpha;
             }
-            currState.undoMove(move);
         }
         // append child move list to move list
         moveList.addAll(bestMoveList);
@@ -153,6 +152,7 @@ public class AlphaBeta {
             DraughtsNode childNode = new DraughtsNode(currState);
             List<Move> childMoveList = new ArrayList<Move>();
             int result = alphaBetaMax(childNode, alpha, beta, depth - 1, childMoveList, oldMoveList);
+            currState.undoMove(move);
             if (result < beta) {
                 beta = result;
                 node.setBestMove(move);
@@ -161,10 +161,8 @@ public class AlphaBeta {
             if (alpha >= beta) {
                 // append child move list to move list
                 moveList.addAll(bestMoveList);
-                currState.undoMove(move);
                 return beta;
             }
-            currState.undoMove(move);
         }
         // append child move list to move list
         moveList.addAll(bestMoveList);
