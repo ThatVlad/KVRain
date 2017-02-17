@@ -122,7 +122,7 @@ public class MagnusCarlsen extends DraughtsPlayer {
                 throw new AIStoppedException();
             }
             ArrayList<Move> depthMoveList = new ArrayList<Move>();
-            if (node.getState().isWhiteToMove()) {
+            if (!node.getState().isWhiteToMove()) {
                 returnValue = alphaBeta.alphaBetaMax(node, alpha, beta, i, depthMoveList, oldMoveList);
             } else {
                 returnValue = alphaBeta.alphaBetaMin(node, alpha, beta, i, depthMoveList, oldMoveList);
