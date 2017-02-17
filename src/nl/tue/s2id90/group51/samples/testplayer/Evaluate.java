@@ -21,7 +21,7 @@ public class Evaluate {
         this.player = player;
     }
     
-    private static final int MAN_SCORE = 5;
+    private static final int MAN_SCORE = 3;
     private static final int KING_SCORE = 15;
     private static final int MOVABLE_SCORE = 1;
     
@@ -125,9 +125,9 @@ public class Evaluate {
             
             if (state.isEndState()) {
                 if (white) {
-                    return 123456789;
-                } else {
                     return -123456789;
+                } else {
+                    return 123456789;
                 }
             }
         

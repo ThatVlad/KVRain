@@ -51,6 +51,7 @@ public class MagnusCarlsen extends DraughtsPlayer {
         } finally {
             System.err.println("Entered finally");
             System.err.println("Max depth searched: " + depthReached);
+            System.err.println("Best value found: " + bestValue);
             // store the bestMove found uptill now
             // NB this is not done in case of an AIStoppedException in alphaBeat()
             bestMove = node.getBestMove();
@@ -124,7 +125,7 @@ public class MagnusCarlsen extends DraughtsPlayer {
                 throw new AIStoppedException();
             }
             ArrayList<Move> depthMoveList = new ArrayList<Move>();
-            if (!node.getState().isWhiteToMove()) {
+            if (node.getState().isWhiteToMove()) {
                 returnValue = alphaBeta.alphaBetaMax(node, alpha, beta, i, depthMoveList, oldMoveList);
             } else {
                 returnValue = alphaBeta.alphaBetaMin(node, alpha, beta, i, depthMoveList, oldMoveList);

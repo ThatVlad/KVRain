@@ -48,7 +48,7 @@ public class AlphaBeta {
         this.evaluate = evaluate;
     }
 
-    public int alphaBetaMin(DraughtsNode node, int alpha, int beta, int depth, List<Move> moveList, List<Move> oldMoveList)
+    public int alphaBetaMax(DraughtsNode node, int alpha, int beta, int depth, List<Move> moveList, List<Move> oldMoveList)
             throws AIStoppedException {
         // throw an exception if our player is forced to stop
         if (player.stopped) {
@@ -89,7 +89,7 @@ public class AlphaBeta {
             currState.doMove(move);
             DraughtsNode childNode = new DraughtsNode(currState);
             List<Move> childMoveList = new ArrayList<Move>();
-            int result = alphaBetaMax(childNode, alpha, beta, depth - 1, childMoveList, oldMoveList);
+            int result = alphaBetaMin(childNode, alpha, beta, depth - 1, childMoveList, oldMoveList);
             if (result > alpha) {
                 alpha = result;
                 node.setBestMove(move);
@@ -108,7 +108,7 @@ public class AlphaBeta {
         return alpha;
     }
 
-    public int alphaBetaMax(DraughtsNode node, int alpha, int beta, int depth, List<Move> moveList, List<Move> oldMoveList)
+    public int alphaBetaMin(DraughtsNode node, int alpha, int beta, int depth, List<Move> moveList, List<Move> oldMoveList)
             throws AIStoppedException {
         // throw an exception if our player is forced to stop
         if (player.stopped) {
@@ -149,7 +149,7 @@ public class AlphaBeta {
             currState.doMove(move);
             DraughtsNode childNode = new DraughtsNode(currState);
             List<Move> childMoveList = new ArrayList<Move>();
-            int result = alphaBetaMin(childNode, alpha, beta, depth - 1, childMoveList, oldMoveList);
+            int result = alphaBetaMax(childNode, alpha, beta, depth - 1, childMoveList, oldMoveList);
             if (result < beta) {
                 beta = result;
                 node.setBestMove(move);
