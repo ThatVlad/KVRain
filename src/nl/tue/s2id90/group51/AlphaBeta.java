@@ -59,7 +59,7 @@ public class AlphaBeta {
         // obtain a reference to the current active state
         DraughtsState currState = node.getState();
         // if final depth reached, then return the value of this leaf
-        if (depth <= 0) {
+        if (depth <= 0 || currState.isEndState()) {
             return evaluate.evaluateState(currState);
         }
         

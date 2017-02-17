@@ -66,6 +66,24 @@ public class Evaluate {
         21, 33
     };
     
+    // Moves up: left-right: 6-5, down: left-right: 4-5
+    private static final int[] POSITIONS_1 = new int[] {
+        7, 8, 9, 10,
+        17, 18, 19, 20,
+        27, 28, 29, 30,
+        37, 38, 39, 40,
+        47, 48, 49, 50
+    };
+    
+    // Moves up: left-right: 5-4, down: left-right: 5-6
+    private static final int[] POSITIONS_2 = new int[] {
+        1, 2, 3, 4,
+        11, 12, 13, 14,
+        21, 22, 23, 24,
+        31, 32, 33, 34,
+        41, 42, 43, 44
+    };
+    
     /**
      * Evaluates the state.
      * 
@@ -73,7 +91,7 @@ public class Evaluate {
      *          The state to be checked
      * @return Score of the state
      */
-    public int evaluateState(DraughtsState state) {
+    public int evaluateState(final DraughtsState state) {
         int score = 0;
         
         int pieceScoreWhite = 0;
@@ -174,47 +192,91 @@ public class Evaluate {
      */
     private int calculateMovableScore(int[] pieces, int position, boolean white) {
         int movableScore = 0;
-        boolean checked = false;
+        
+        //TODO: this doesnt work for king
         if (position <= 5 && white || position >= 46 && !white) {
-            checked = true;
+            return movableScore;
         }
 
+//        // Checking if the piece is against the border, so only one move is possible
+//        for (int i = 0; i < 5; i++) {
+//            if (LEFT_BORDER[i] == position || RIGHT_BORDER[i] == position) {
+//                checked = true;
+//                int possibleMove = pieces[position - 5];
+//                if (possibleMove == 0) {
+//                    movableScore += MOVABLE_SCORE;
+//                }
+//            }
+//        }
+
+        // Check which positions could be a legal move
+        boolean bordered = false; // Either left or right border if true
+        int possibleMove1 = 0;
+        int possibleMove2 = 0;
+        boolean position1 = false; // Position on board influcences int difference for next move
+        // Check if against a border
         for (int i = 0; i < 5; i++) {
-            if (LEFT_BORDER[i] == position || RIGHT_BORDER[i] == position) {
-                checked = true;
-                int possibleMove = pieces[position - 5];
-                if (possibleMove == 0) {
-                    movableScore += MOVABLE_SCORE;
+            if (LEFT_BORDER[i] == position) {
+                possibleMove1 = white ? position - 5 : position + 5;
+                bordered = true;
+                position1 = true;
+                break;
+            } else if (RIGHT_BORDER[i] == position) {
+                possibleMove1 = white ? position - 5 : position + 5;
+                bordered = true;
+                position1 = false;
+                break;
+            }
+        }
+        
+        if (!bordered) {
+            for (int i = 0; i < POSITIONS_1.length; i++) {
+                if (POSITIONS_1[i] == position) {
+                    position1 = true;
+                    break;
+                } else if (POSITIONS_2[i] == position) {
+                    position1 = false;
+                    break;
+                }
+            }
+            
+            if (position1) {
+                if (white) {
+                    possibleMove1 = position - 5;
+                    possibleMove1 = position - 6;
+                } else {
+                    possibleMove1 = position + 4;
+                    possibleMove1 = position + 5;
+                }
+            } else {
+                if (white) {
+                    possibleMove1 = position - 4;
+                    possibleMove1 = position - 5;
+                } else {
+                    possibleMove1 = position + 5;
+                    possibleMove1 = position + 6;
                 }
             }
         }
-
-        if (!checked) {
-            int move1 = 5;
-            int move2 = 6;
-            
-            if (!white) {
-                move1 *= -1;
-                move2 *= -1;
-            }
-            
-            int possibleMove1 = pieces[position - move1];
-            //int possibleMove2 = pieces[position - move2];
-            if (possibleMove1 == 0) {
-                movableScore += MOVABLE_SCORE;
-            }
-            //if (possibleMove2 == 0) {
-              //  movableScore += MOVABLE_SCORE;
-            //}
+        
+        // Check if the legality of the move(s)
+        if (isMovePossible(pieces, position, position1, possibleMove1, white)) {
+            movableScore += MOVABLE_SCORE;
+        }
+        if (possibleMove2 != 0 && isMovePossible(pieces, position, position1, possibleMove2, white)) {
+            movableScore += MOVABLE_SCORE;
         }
         
         return movableScore;
     }
     
-    private boolean isMovePossible(int[] pieces, int position, int move, boolean white) {
+    /**
+     * Checks if a given move is possible
+     */
+    private boolean isMovePossible(int[] pieces, int position, boolean position1, int move, boolean white) {
         int newPosition = pieces[move];
         
-        // Empty space
+        // If empty space, move is possible
         if (newPosition == DraughtsState.EMPTY) {
             return true;
         }
@@ -232,12 +294,60 @@ public class Evaluate {
             }
         }
         
-        if (!canJump) {
+        // Can't jump over edges
+        if (!canJump || contains(SCORE4_POSITIONS, newPosition)) {
             return false;
         }
         
+        // Check which direction the jump is in
+        int moveDifference = Math.abs(newPosition - position);
         
+        int jumpPosition = 0;
         
+        if (position1) {
+            if (white) {
+                if (moveDifference == 5) {
+                    jumpPosition = newPosition - 4;
+                } else if (moveDifference == 6) {
+                    jumpPosition = newPosition - 5;                  
+                }
+            } else {
+                if (moveDifference == 4) {
+                    jumpPosition = newPosition + 5;
+                } else if (moveDifference == 5) {
+                    jumpPosition = newPosition + 6;                  
+                }
+            }
+        } else {
+            if (white) {
+                if (moveDifference == 4) {
+                    jumpPosition = newPosition - 5;
+                } else if (moveDifference == 5) {
+                    jumpPosition = newPosition - 6;                  
+                }
+            } else {
+                if (moveDifference == 5) {
+                    jumpPosition = newPosition + 4;
+                } else if (moveDifference == 6) {
+                    jumpPosition = newPosition + 5;                  
+                }
+            }
+        }
+        
+        // Check if the new jump position is empty
+        if (pieces[jumpPosition] == DraughtsState.EMPTY) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    private boolean contains(int[] array, int value) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] == value) {
+                return true;
+            }
+        }
         
         return false;
     }
