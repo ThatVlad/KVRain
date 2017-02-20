@@ -7,6 +7,7 @@ package nl.tue.s2id90.group51;
 
 import nl.tue.s2id90.draughts.DraughtsState;
 import nl.tue.s2id90.draughts.player.DraughtsPlayer;
+import org10x10.dam.game.Move;
 
 /**
  *
@@ -87,7 +88,7 @@ public class Evaluate {
     /**
      * Evaluates the state.
      * 
-     * @param state
+     * @param stateToCheck
      *          The state to be checked
      * @return Score of the state
      */
@@ -101,7 +102,10 @@ public class Evaluate {
         int movableScoreWhite = 0;
         int movableScoreBlack = 0;
         
-        int[] pieces = state.getPieces();
+        // Get the state after forced capture moves
+        DraughtsState stateToCheck = findStateToCheck(state);
+        
+        int[] pieces = stateToCheck.getPieces();
         
         for (int position = 1; position < pieces.length; position++) {
             int piece = pieces[position];
@@ -122,7 +126,7 @@ public class Evaluate {
                 pieceScoreBlack += KING_SCORE;
             }
             
-            if (state.isEndState()) {
+            if (stateToCheck.isEndState()) {
                 if (white) {
                     return -123456789;
                 } else {
@@ -159,6 +163,45 @@ public class Evaluate {
         
         return score;
     }
+    
+    /**
+     * Finds the state to actually evaluate after forced captures 
+     */
+    private DraughtsState findStateToCheck(final DraughtsState state) {
+        // Check if a capture can be made
+        boolean canCapture = false;
+        Move captureMove = null;
+        for (Move move : state.getMoves()) {
+            if (move.isCapture()) {
+                captureMove = move;
+                canCapture = true;
+                break;
+            }
+        }
+        
+        if (!canCapture) {
+            return state;
+        } 
+        // If a capture has to be made
+        DraughtsState returnState = state.clone();
+
+        // Do the forced capture move until there are none left
+        // TODO: now only does first capture move found
+        while (canCapture) {
+            returnState.doMove(captureMove);
+            canCapture = false;
+            for (Move move : state.getMoves()) {
+                if (move.isCapture()) {
+                    captureMove = move;
+                    canCapture = true;
+                    break;
+                }
+            }
+        }
+        
+        return returnState;
+    }
+        
     
     /**
      * Calculates the score for the position of the pieces
