@@ -21,8 +21,8 @@ public class Evaluate {
         this.player = player;
     }
     
-    private static final int MAN_SCORE = 8;
-    private static final int KING_SCORE = 25;
+    private static final int MAN_SCORE = 10;
+    private static final int KING_SCORE = 35;
     private static final int MOVABLE_SCORE = 1;
     
     private static final int[] LEFT_BORDER = new int[] {
@@ -88,7 +88,7 @@ public class Evaluate {
     /**
      * Evaluates the state.
      * 
-     * @param stateToCheck
+     * @param state
      *          The state to be checked
      * @return Score of the state
      */
@@ -103,64 +103,80 @@ public class Evaluate {
         int movableScoreBlack = 0;
         
         // Get the state after forced capture moves
-        DraughtsState stateToCheck = findStateToCheck(state);
+        // TODO: gwn overslaan in alpha-beta en dan naar laatste gaan?
+        //DraughtsState stateToCheck = findStateToCheck(state);
+        DraughtsState stateToCheck = state;
         
-        int[] pieces = stateToCheck.getPieces();
-        
-        for (int position = 1; position < pieces.length; position++) {
-            int piece = pieces[position];
-            
-            boolean man = true;
-            boolean white = true;
-            
-            // Check piece type for score
-            if (piece == DraughtsState.WHITEPIECE) {
-                pieceScoreWhite += MAN_SCORE;
-            } else if (piece == DraughtsState.BLACKPIECE) {
-                white = false;
-                pieceScoreBlack += MAN_SCORE;
-            } else if (piece == DraughtsState.WHITEKING) {
-                pieceScoreWhite += KING_SCORE;
-            } else if (piece == DraughtsState.BLACKKING) {
-                white = false;
-                pieceScoreBlack += KING_SCORE;
+        // Check for winning state
+        // If isEndState is true, then there are no more moves possible
+        if (stateToCheck.isEndState()) {
+            if (stateToCheck.isWhiteToMove()) {
+                return -123456789;
+            } else {
+                return 123456789;
             }
-            
-            if (stateToCheck.isEndState()) {
-                if (white) {
-                    return -123456789;
+        }
+        
+        int[][] pieces = new int[10][10];
+        
+        // Get all pieces
+        for (int row = 0; row < 10; row++) {
+            for (int col = ((row & 1) == 0) ? 1 : 0; col < 10; col += 2) {
+                pieces[row][col] = stateToCheck.getPiece(row, col);
+            }
+        }
+        
+        for (int row = 0; row < 10; row++) {
+            for (int col = ((row & 1) == 0) ? 1 : 0; col < 10; col += 2) {
+                int piece = pieces[row][col];
+                
+                boolean man = true;
+                boolean white = true;
+
+                // Check piece type for score
+                if (piece == DraughtsState.WHITEPIECE) {
+                    pieceScoreWhite += MAN_SCORE;
+                } else if (piece == DraughtsState.BLACKPIECE) {
+                    white = false;
+                    pieceScoreBlack += MAN_SCORE;
                 } else {
-                    return 123456789;
+                    man = false;
+                    if (piece == DraughtsState.WHITEKING) {
+                        pieceScoreWhite += KING_SCORE;
+                    } else if (piece == DraughtsState.BLACKKING) {
+                        white = false;
+                        pieceScoreBlack += KING_SCORE;
+                    }
                 }
-            }
-            
-            // Check position for score
-            int positionScore = calculatePositionScore(position);
-            if (positionScore != 0) {
+
+                
+
+                // Check position for score
+                int positionScore = calculatePositionScore(col, row, white);
                 if (white) {
                     positionScoreWhite += positionScore;
                 } else {
                     positionScoreBlack += positionScore;
                 }
-            }
-            
-            
-            // Check for possible moves
-            int movableScore = calculateMovableScore(pieces, position, white);
-            if (movableScore != 0) {
-                if (white) {
-                    movableScoreWhite += movableScore;
-                } else {
-                    movableScoreBlack += movableScore;
-                }
+
+
+                // Check for possible moves
+//                int movableScore = calculateMovableScore(pieces, position, white);
+//                if (movableScore != 0) {
+//                    if (white) {
+//                        movableScoreWhite += movableScore;
+//                    } else {
+//                        movableScoreBlack += movableScore;
+//                    }
+//                }
             }
         }
         
         int whiteScore = pieceScoreWhite + positionScoreWhite + movableScoreWhite;
         int blackScore = pieceScoreBlack + positionScoreBlack + movableScoreBlack;
-        
+
         score = whiteScore - blackScore;
-        
+
         return score;
     }
     
@@ -205,37 +221,33 @@ public class Evaluate {
     
     /**
      * Calculates the score for the position of the pieces
+     * 
+     * Maximum of 13;
      */
-    private int calculatePositionScore(int position) {
-        for (int i = 0; i < SCORE4_POSITIONS.length; i++) {
-            if (SCORE4_POSITIONS[i] == position) {
-                return 2;
-            }
-
-            if (i < SCORE3_POSITIONS.length) {
-                if (SCORE3_POSITIONS[i] == position) {
-                    return 3;
-                }
-            } else {
-                break;
-            }
-
-            if (i < SCORE2_POSITIONS.length) {
-                if (SCORE2_POSITIONS[i] == position) {
-                    return 3;
-                }
-            } else {
-                break;
-            }
-
-            if (i < SCORE1_POSITIONS.length) {
-                if (SCORE1_POSITIONS[i] == position) {
-                    return 4;
-                }
-            }
+    private int calculatePositionScore(int col, int row, boolean white) {
+        int score = 0;
+        
+        // Add score based on row, center is better than edges
+        if (row == 0 || row == 9) {
+            score += 2;
+        } else if (row == 1 || row == 8) {
+            score += 1;
+        } else if (row == 2 || row == 7) {
+            score += 2;
+        } else if (row == 3 || row == 6) {
+            score += 3;
+        } else if (row == 4 || row == 5) {
+            score += 4;
         }
         
-        return 0;
+        // Add score based on column, further forward is better
+        if (white) {
+            col = 9 - col;
+        }
+        
+        score += col;
+
+        return score;
     }
     
     /**

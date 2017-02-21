@@ -120,13 +120,13 @@ public class MagnusCarlsen extends DraughtsPlayer {
         //iterative deepening
         int returnValue = 0;
         alphaBeta.statesSearched = 0;
-        List<Move> oldMoveList = new ArrayList<Move>();
+        List<Move> oldMoveList = new ArrayList<>();
         for (int i = 1; i <= depth; i++) {
             if (stopped) {
                 stopped = false;
                 throw new AIStoppedException();
             }
-            ArrayList<Move> depthMoveList = new ArrayList<Move>();
+            ArrayList<Move> depthMoveList = new ArrayList<>();
             if (node.getState().isWhiteToMove()) {
                 returnValue = alphaBeta.alphaBetaMax(node, alpha, beta, i, depthMoveList, oldMoveList);
             } else {
@@ -143,7 +143,6 @@ public class MagnusCarlsen extends DraughtsPlayer {
     /**
      * A method that evaluates the given state.
      */
-    // ToDo: write an appropriate evaluation function
     int evaluate(DraughtsState state) {
         return evaluate.evaluateState(state);
     }

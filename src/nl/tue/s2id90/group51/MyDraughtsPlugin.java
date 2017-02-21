@@ -22,6 +22,7 @@ public class MyDraughtsPlugin extends DraughtsPlayerProvider implements Draughts
         // best player available. For testing it might be handy
         // to make more than one player available.
         super(new MagnusCarlsen(1000),
+                new MagnusCarlsen(1000),
                 new UninformedPlayer(),
                 new OptimisticPlayer(),
                 new BuggyPlayer(),
