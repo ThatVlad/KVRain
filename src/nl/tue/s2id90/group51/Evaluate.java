@@ -7,7 +7,6 @@ package nl.tue.s2id90.group51;
 
 import nl.tue.s2id90.draughts.DraughtsState;
 import nl.tue.s2id90.draughts.player.DraughtsPlayer;
-import org10x10.dam.game.Move;
 
 /**
  *
@@ -134,48 +133,9 @@ public class Evaluate {
     }
     
     /**
-     * Finds the state to actually evaluate after forced captures 
-     */
-    private DraughtsState findStateToCheck(final DraughtsState state) {
-        // Check if a capture can be made
-        boolean canCapture = false;
-        Move captureMove = null;
-        for (Move move : state.getMoves()) {
-            if (move.isCapture()) {
-                captureMove = move;
-                canCapture = true;
-                break;
-            }
-        }
-        
-        if (!canCapture) {
-            return state;
-        } 
-        // If a capture has to be made
-        DraughtsState returnState = state.clone();
-
-        // Do the forced capture move until there are none left
-        // TODO: now only does first capture move found
-        while (canCapture) {
-            returnState.doMove(captureMove);
-            canCapture = false;
-            for (Move move : state.getMoves()) {
-                if (move.isCapture()) {
-                    captureMove = move;
-                    canCapture = true;
-                    break;
-                }
-            }
-        }
-        
-        return returnState;
-    }
-        
-    
-    /**
      * Calculates the score for the position of the pieces
      * 
-     * Maximum of 14;
+     * Maximum of 15;
      */
     private int calculatePositionScore(int row, int col, boolean white) {
         int score = 0;
@@ -188,9 +148,9 @@ public class Evaluate {
         } else if (col == 2 || col == 7) {
             score += 3;
         } else if (col == 3 || col == 6) {
-            score += 4;
-        } else if (col == 4 || col == 5) {
             score += 5;
+        } else if (col == 4 || col == 5) {
+            score += 6;
         }
         
         // Add score based on column, further forward is better
@@ -206,7 +166,7 @@ public class Evaluate {
     /**
      * Checks the surrounding tiles for pieces of the same color for score.
      * 
-     * Max 4 per piece.
+     * Max 4*ADJACENT_SCORE per piece.
      */
     private int calculateSurroundingScore(int[][] pieces, int row, int col, boolean white) {
         int score = 0;
