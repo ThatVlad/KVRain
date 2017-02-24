@@ -20,70 +20,12 @@ public class Evaluate {
     public Evaluate(DraughtsPlayer player) {
         this.player = player;
     }
+    private static final int BOARDSIZE = 10;
     
-    private static final int MAN_SCORE = 10;
-    private static final int KING_SCORE = 35;
+    private static final int MAN_SCORE = 15;
+    private static final int KING_SCORE = 50;
+    private static final int ADJACENT_SCORE = 1;
     private static final int MOVABLE_SCORE = 1;
-    
-    private static final int[] LEFT_BORDER = new int[] {
-        6, 16, 26, 36, 46
-    };
-    private static final int[] RIGHT_BORDER = new int[] {
-        5, 15, 25, 35, 45
-    };
-    
-    // Score = 5
-    private static final int[] SCORE4_POSITIONS = new int[] {
-        1,  2,  3,  4,  5,
-        6,              15,
-        16,             25,
-        26,             35,     
-        36,             45,
-        46, 47, 48, 49, 50
-    };
-    
-    // Score = 4
-    private static final int[] SCORE3_POSITIONS = new int[] {
-        7,  8,  9,  10,
-        11,         20,
-        21,         30,
-        31,         40,
-        41, 42, 43, 44
-    };
-    
-    // Score = 3
-    private static final int[] SCORE2_POSITIONS = new int[] {
-        12, 13, 14,
-        17,     24,
-        27,     34,
-        37, 38, 39
-    };
-    
-    // Score = 2
-    private static final int[] SCORE1_POSITIONS = new int[] {
-        18, 19,
-        22, 23,
-        28, 29,
-        21, 33
-    };
-    
-    // Moves up: left-right: 6-5, down: left-right: 4-5
-    private static final int[] POSITIONS_1 = new int[] {
-        7, 8, 9, 10,
-        17, 18, 19, 20,
-        27, 28, 29, 30,
-        37, 38, 39, 40,
-        47, 48, 49, 50
-    };
-    
-    // Moves up: left-right: 5-4, down: left-right: 5-6
-    private static final int[] POSITIONS_2 = new int[] {
-        1, 2, 3, 4,
-        11, 12, 13, 14,
-        21, 22, 23, 24,
-        31, 32, 33, 34,
-        41, 42, 43, 44
-    };
     
     /**
      * Evaluates the state.
@@ -99,6 +41,8 @@ public class Evaluate {
         int pieceScoreBlack = 0;
         int positionScoreWhite = 0;
         int positionScoreBlack = 0;
+        int surroundingScoreWhite = 0;
+        int surroundingScoreBlack = 0;
         int movableScoreWhite = 0;
         int movableScoreBlack = 0;
         
@@ -117,17 +61,17 @@ public class Evaluate {
             }
         }
         
-        int[][] pieces = new int[10][10];
+        int[][] pieces = new int[BOARDSIZE][BOARDSIZE];
         
         // Get all pieces
-        for (int row = 0; row < 10; row++) {
-            for (int col = ((row & 1) == 0) ? 1 : 0; col < 10; col += 2) {
+        for (int row = 0; row < BOARDSIZE; row++) {
+            for (int col = ((row & 1) == 0) ? 1 : 0; col < BOARDSIZE; col += 2) {
                 pieces[row][col] = stateToCheck.getPiece(row, col);
             }
         }
         
-        for (int row = 0; row < 10; row++) {
-            for (int col = ((row & 1) == 0) ? 1 : 0; col < 10; col += 2) {
+        for (int row = 0; row < BOARDSIZE; row++) {
+            for (int col = ((row & 1) == 0) ? 1 : 0; col < BOARDSIZE; col += 2) {
                 int piece = pieces[row][col];
                 
                 if (piece == DraughtsState.EMPTY || piece == DraughtsState.WHITEFIELD) {
@@ -153,16 +97,21 @@ public class Evaluate {
                     }
                 }
 
-                
-
                 // Check position for score
-                int positionScore = calculatePositionScore(col, row, white);
+                int positionScore = calculatePositionScore(row, col, white);
                 if (white) {
                     positionScoreWhite += positionScore;
                 } else {
                     positionScoreBlack += positionScore;
                 }
-
+                
+                // Check surrounding pieces for score
+                int surroundingScore = calculateSurroundingScore(pieces, row, col, white);
+                if (white) {
+                    surroundingScoreWhite += surroundingScore;
+                } else {
+                    surroundingScoreBlack += surroundingScore;
+                }
 
                 // Check for possible moves
 //                int movableScore = calculateMovableScore(pieces, position, white);
@@ -176,8 +125,8 @@ public class Evaluate {
             }
         }
         
-        int whiteScore = pieceScoreWhite + positionScoreWhite + movableScoreWhite;
-        int blackScore = pieceScoreBlack + positionScoreBlack + movableScoreBlack;
+        int whiteScore = pieceScoreWhite + positionScoreWhite + surroundingScoreWhite;
+        int blackScore = pieceScoreBlack + positionScoreBlack + surroundingScoreBlack;
 
         score = whiteScore - blackScore;
 
@@ -226,31 +175,57 @@ public class Evaluate {
     /**
      * Calculates the score for the position of the pieces
      * 
-     * Maximum of 13;
+     * Maximum of 14;
      */
-    private int calculatePositionScore(int col, int row, boolean white) {
+    private int calculatePositionScore(int row, int col, boolean white) {
         int score = 0;
         
         // Add score based on row, center is better than edges
-        if (row == 0 || row == 9) {
-            score += 2;
-        } else if (row == 1 || row == 8) {
+        if (col == 0 || col == 9) {
             score += 1;
-        } else if (row == 2 || row == 7) {
+        } else if (col == 1 || col == 8) {
             score += 2;
-        } else if (row == 3 || row == 6) {
+        } else if (col == 2 || col == 7) {
             score += 3;
-        } else if (row == 4 || row == 5) {
+        } else if (col == 3 || col == 6) {
             score += 4;
+        } else if (col == 4 || col == 5) {
+            score += 5;
         }
         
         // Add score based on column, further forward is better
         if (white) {
-            col = 9 - col;
+            row = 9 - row;
         }
         
-        score += col;
+        score += row;
 
+        return score;
+    }
+    
+    /**
+     * Checks the surrounding tiles for pieces of the same color for score.
+     * 
+     * Max 4 per piece.
+     */
+    private int calculateSurroundingScore(int[][] pieces, int row, int col, boolean white) {
+        int score = 0;
+        
+        for (int y = Math.max(0, row - 1); y < BOARDSIZE; y++) {
+            for (int x = Math.max(0, col - 1); x < BOARDSIZE; x++) {
+                int piece = pieces[y][x];
+                if (white) {
+                    if (piece == DraughtsState.WHITEPIECE || piece == DraughtsState.WHITEKING) {
+                        score += ADJACENT_SCORE;
+                    }
+                } else {
+                    if (piece == DraughtsState.BLACKPIECE || piece == DraughtsState.BLACKKING) {
+                        score += ADJACENT_SCORE;
+                    }
+                }
+            }
+        }
+        
         return score;
     }
     
@@ -259,81 +234,6 @@ public class Evaluate {
      */
     private int calculateMovableScore(int[] pieces, int position, boolean white) {
         int movableScore = 0;
-        
-        //TODO: this doesnt work for king
-        if (position <= 5 && white || position >= 46 && !white) {
-            return movableScore;
-        }
-
-//        // Checking if the piece is against the border, so only one move is possible
-//        for (int i = 0; i < 5; i++) {
-//            if (LEFT_BORDER[i] == position || RIGHT_BORDER[i] == position) {
-//                checked = true;
-//                int possibleMove = pieces[position - 5];
-//                if (possibleMove == 0) {
-//                    movableScore += MOVABLE_SCORE;
-//                }
-//            }
-//        }
-
-        // Check which positions could be a legal move
-        boolean bordered = false; // Either left or right border if true
-        int possibleMove1 = 0;
-        int possibleMove2 = 0;
-        boolean position1 = false; // Position on board influcences int difference for next move
-        // Check if against a border
-        for (int i = 0; i < 5; i++) {
-            if (LEFT_BORDER[i] == position) {
-                possibleMove1 = white ? position - 5 : position + 5;
-                bordered = true;
-                position1 = true;
-                break;
-            } else if (RIGHT_BORDER[i] == position) {
-                possibleMove1 = white ? position - 5 : position + 5;
-                bordered = true;
-                position1 = false;
-                break;
-            }
-        }
-        
-        if (!bordered) {
-            for (int i = 0; i < POSITIONS_1.length; i++) {
-                if (POSITIONS_1[i] == position) {
-                    position1 = true;
-                    break;
-                } else if (POSITIONS_2[i] == position) {
-                    position1 = false;
-                    break;
-                }
-            }
-            
-            if (position1) {
-                if (white) {
-                    possibleMove1 = position - 5;
-                    possibleMove1 = position - 6;
-                } else {
-                    possibleMove1 = position + 4;
-                    possibleMove1 = position + 5;
-                }
-            } else {
-                if (white) {
-                    possibleMove1 = position - 4;
-                    possibleMove1 = position - 5;
-                } else {
-                    possibleMove1 = position + 5;
-                    possibleMove1 = position + 6;
-                }
-            }
-        }
-        
-        // Check if the legality of the move(s)
-        if (isMovePossible(pieces, position, position1, possibleMove1, white)) {
-            movableScore += MOVABLE_SCORE;
-        }
-        if (possibleMove2 != 0 && isMovePossible(pieces, position, position1, possibleMove2, white)) {
-            movableScore += MOVABLE_SCORE;
-        }
-        
         return movableScore;
     }
     
@@ -341,71 +241,6 @@ public class Evaluate {
      * Checks if a given move is possible
      */
     private boolean isMovePossible(int[] pieces, int position, boolean position1, int move, boolean white) {
-        int newPosition = pieces[move];
-        
-        // If empty space, move is possible
-        if (newPosition == DraughtsState.EMPTY) {
-            return true;
-        }
-        
-        boolean canJump = false;
-        
-        // Check if new position is occupied by enemy piece
-        if (white) {
-            if (newPosition == DraughtsState.BLACKPIECE || newPosition == DraughtsState.BLACKKING) {
-                canJump = true;
-            }
-        } else {
-            if (newPosition == DraughtsState.WHITEPIECE || newPosition == DraughtsState.WHITEKING) {
-                canJump = true;
-            }
-        }
-        
-        // Can't jump over edges
-        if (!canJump || contains(SCORE4_POSITIONS, newPosition)) {
-            return false;
-        }
-        
-        // Check which direction the jump is in
-        int moveDifference = Math.abs(newPosition - position);
-        
-        int jumpPosition = 0;
-        
-        if (position1) {
-            if (white) {
-                if (moveDifference == 5) {
-                    jumpPosition = newPosition - 4;
-                } else if (moveDifference == 6) {
-                    jumpPosition = newPosition - 5;                  
-                }
-            } else {
-                if (moveDifference == 4) {
-                    jumpPosition = newPosition + 5;
-                } else if (moveDifference == 5) {
-                    jumpPosition = newPosition + 6;                  
-                }
-            }
-        } else {
-            if (white) {
-                if (moveDifference == 4) {
-                    jumpPosition = newPosition - 5;
-                } else if (moveDifference == 5) {
-                    jumpPosition = newPosition - 6;                  
-                }
-            } else {
-                if (moveDifference == 5) {
-                    jumpPosition = newPosition + 4;
-                } else if (moveDifference == 6) {
-                    jumpPosition = newPosition + 5;                  
-                }
-            }
-        }
-        
-        // Check if the new jump position is empty
-        if (pieces[jumpPosition] == DraughtsState.EMPTY) {
-            return true;
-        }
-        
         return false;
     }
     
