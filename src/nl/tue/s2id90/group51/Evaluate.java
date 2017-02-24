@@ -13,29 +13,28 @@ import nl.tue.s2id90.draughts.player.DraughtsPlayer;
  * @author Kerry, Vlad
  */
 public class Evaluate {
-    
+
     private final DraughtsPlayer player;
-    
+
     public Evaluate(DraughtsPlayer player) {
         this.player = player;
     }
     private static final int BOARDSIZE = 10;
-    
+
     private static final int MAN_SCORE = 15;
     private static final int KING_SCORE = 50;
     private static final int ADJACENT_SCORE = 1;
     private static final int MOVABLE_SCORE = 1;
-    
+
     /**
      * Evaluates the state.
-     * 
-     * @param state
-     *          The state to be checked
+     *
+     * @param state The state to be checked
      * @return Score of the state
      */
     public int evaluateState(final DraughtsState state) {
         int score = 0;
-        
+
         int pieceScoreWhite = 0;
         int pieceScoreBlack = 0;
         int positionScoreWhite = 0;
@@ -44,12 +43,12 @@ public class Evaluate {
         int surroundingScoreBlack = 0;
         int movableScoreWhite = 0;
         int movableScoreBlack = 0;
-        
+
         // Get the state after forced capture moves
         // TODO: gwn overslaan in alpha-beta en dan naar laatste gaan?
         //DraughtsState stateToCheck = findStateToCheck(state);
         DraughtsState stateToCheck = state;
-        
+
         // Check for winning state
         // If isEndState is true, then there are no more moves possible
         if (stateToCheck.isEndState()) {
@@ -59,24 +58,24 @@ public class Evaluate {
                 return 123456789;
             }
         }
-        
+
         int[][] pieces = new int[BOARDSIZE][BOARDSIZE];
-        
+
         // Get all pieces
         for (int row = 0; row < BOARDSIZE; row++) {
             for (int col = ((row & 1) == 0) ? 1 : 0; col < BOARDSIZE; col += 2) {
                 pieces[row][col] = stateToCheck.getPiece(row, col);
             }
         }
-        
+
         for (int row = 0; row < BOARDSIZE; row++) {
             for (int col = ((row & 1) == 0) ? 1 : 0; col < BOARDSIZE; col += 2) {
                 int piece = pieces[row][col];
-                
+
                 if (piece == DraughtsState.EMPTY || piece == DraughtsState.WHITEFIELD) {
                     continue;
                 }
-                
+
                 boolean man = true;
                 boolean white = true;
 
@@ -97,13 +96,14 @@ public class Evaluate {
                 }
 
                 // Check position for score
-                int positionScore = calculatePositionScore(row, col, white);
+                boolean isKing = ( piece == DraughtsState.WHITEKING || piece == DraughtsState.BLACKKING );
+                int positionScore = calculatePositionScore(row, col, white, isKing);
                 if (white) {
                     positionScoreWhite += positionScore;
                 } else {
                     positionScoreBlack += positionScore;
                 }
-                
+
                 // Check surrounding pieces for score
                 int surroundingScore = calculateSurroundingScore(pieces, row, col, white);
                 if (white) {
@@ -123,7 +123,7 @@ public class Evaluate {
 //                }
             }
         }
-        
+
         int whiteScore = pieceScoreWhite + positionScoreWhite + surroundingScoreWhite;
         int blackScore = pieceScoreBlack + positionScoreBlack + surroundingScoreBlack;
 
@@ -131,15 +131,15 @@ public class Evaluate {
 
         return score;
     }
-    
+
     /**
      * Calculates the score for the position of the pieces
-     * 
+     *
      * Maximum of 15;
      */
-    private int calculatePositionScore(int row, int col, boolean white) {
+    private int calculatePositionScore(int row, int col, boolean white, boolean king) {
         int score = 0;
-        
+
         // Add score based on row, center is better than edges
         if (col == 0 || col == 9) {
             score += 1;
@@ -152,25 +152,29 @@ public class Evaluate {
         } else if (col == 4 || col == 5) {
             score += 6;
         }
-        
+
         // Add score based on column, further forward is better
-        if (white) {
-            row = 9 - row;
+        // King's vertical positioning may be neglected
+        if (!king) {
+            if (white) {
+                row = 9 - row;
+            }
+
+            score += row;
         }
-        
-        score += row;
+        else score += 9; // must give max score to kings to not have "dip" in score upon promotion
 
         return score;
     }
-    
+
     /**
      * Checks the surrounding tiles for pieces of the same color for score.
-     * 
+     *
      * Max 4*ADJACENT_SCORE per piece.
      */
     private int calculateSurroundingScore(int[][] pieces, int row, int col, boolean white) {
         int score = 0;
-        
+
         for (int y = Math.max(0, row - 1); y < BOARDSIZE; y++) {
             for (int x = Math.max(0, col - 1); x < BOARDSIZE; x++) {
                 int piece = pieces[y][x];
@@ -185,10 +189,10 @@ public class Evaluate {
                 }
             }
         }
-        
+
         return score;
     }
-    
+
     /**
      * Calculates the score for the number of moves that can be done
      */
@@ -196,24 +200,24 @@ public class Evaluate {
         int movableScore = 0;
         return movableScore;
     }
-    
+
     /**
      * Checks if a given move is possible
      */
     private boolean isMovePossible(int[] pieces, int position, boolean position1, int move, boolean white) {
         return false;
     }
-    
+
     private boolean contains(int[] array, int value) {
         for (int i = 0; i < array.length; i++) {
             if (array[i] == value) {
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     /*
     Piece       Score
     Own Man     1
@@ -226,22 +230,22 @@ public class Evaluate {
     Check for position of pieces
     
     /* 1: sum total number of your pieces (subtract from adversary) */
-/* 2: sum total number of your king pieces (subtract from opponent king pieces) */
-/* 3: Offense: count how advanced are your pieces (how close to become a king)
+ /* 2: sum total number of your king pieces (subtract from opponent king pieces) */
+ /* 3: Offense: count how advanced are your pieces (how close to become a king)
 (subtract from opponents advanced position). How to count this? For example, count
 how much is the sum of all your “a” component. Note that depending if you are red or
 white, high sum or low sum may be preferred.*/
-/* 4: Defense: how well defended are the pieces? sum total number of red previous
+ /* 4: Defense: how well defended are the pieces? sum total number of red previous
 neighbors (n3,n4) to a red piece and subtract from total number of white previous
 neighbors (n1, n2) to a white piece. */
-/* 5: Defense against kings: sum total number of red post neighbors (n1,n2) to a red
+ /* 5: Defense against kings: sum total number of red post neighbors (n1,n2) to a red
 piece and subtract from total number of white post neighbors (n1, n2) to a white
 piece. Combine with 4. */
-/* 6: Defense on sides: see if pieces are on the sides of the board, so that they are
+ /* 6: Defense on sides: see if pieces are on the sides of the board, so that they are
 defended. This criteria should be combined with 4,5.*/
-/*7: Defense: Kings on corners are better defended. This is should be combined with
+ /*7: Defense: Kings on corners are better defended. This is should be combined with
 4, 5 and 6 */
-/* 8: Dynamic position. Count number of possible moves by pieces. Count number of
+ /* 8: Dynamic position. Count number of possible moves by pieces. Count number of
 possible moves by kings. Compare with opponents.
     
     INT
@@ -252,6 +256,5 @@ possible moves by kings. Compare with opponents.
     4   =   Black King
     5   =   Non-playing field
     
-    */
-    
+     */
 }
