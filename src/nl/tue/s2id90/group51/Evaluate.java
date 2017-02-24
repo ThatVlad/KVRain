@@ -38,6 +38,8 @@ public class Evaluate {
         
         int pieceScoreWhite = 0;
         int pieceScoreBlack = 0;
+        int kingScoreWhite = 0;
+        int kingScoreBlack = 0;
         int positionScoreWhite = 0;
         int positionScoreBlack = 0;
         int surroundingScoreWhite = 0;
@@ -45,9 +47,7 @@ public class Evaluate {
         int movableScoreWhite = 0;
         int movableScoreBlack = 0;
         
-        // Get the state after forced capture moves
-        // TODO: gwn overslaan in alpha-beta en dan naar laatste gaan?
-        //DraughtsState stateToCheck = findStateToCheck(state);
+        // 
         DraughtsState stateToCheck = state;
         
         // Check for winning state
@@ -81,6 +81,7 @@ public class Evaluate {
                 boolean white = true;
 
                 // Check piece type for score
+                // Set variables according to piece
                 if (piece == DraughtsState.WHITEPIECE) {
                     pieceScoreWhite += MAN_SCORE;
                 } else if (piece == DraughtsState.BLACKPIECE) {
@@ -89,10 +90,10 @@ public class Evaluate {
                 } else {
                     man = false;
                     if (piece == DraughtsState.WHITEKING) {
-                        pieceScoreWhite += KING_SCORE;
+                        kingScoreWhite += KING_SCORE;
                     } else if (piece == DraughtsState.BLACKKING) {
                         white = false;
-                        pieceScoreBlack += KING_SCORE;
+                        kingScoreBlack += KING_SCORE;
                     }
                 }
 
@@ -124,8 +125,27 @@ public class Evaluate {
             }
         }
         
-        int whiteScore = pieceScoreWhite + positionScoreWhite + surroundingScoreWhite;
-        int blackScore = pieceScoreBlack + positionScoreBlack + surroundingScoreBlack;
+        int whiteScore = pieceScoreWhite + 
+                kingScoreWhite +
+                positionScoreWhite + 
+                surroundingScoreWhite;
+        int blackScore = pieceScoreBlack + 
+                kingScoreBlack +
+                positionScoreBlack + 
+                surroundingScoreBlack;
+        
+        // Give an advantage to the color with more pieces
+        if (pieceScoreWhite > pieceScoreBlack) {
+            whiteScore += MAN_SCORE;
+        } else if (pieceScoreBlack > pieceScoreWhite) {
+            blackScore += MAN_SCORE;
+        }
+        
+        if (kingScoreWhite > kingScoreBlack) {
+            whiteScore += KING_SCORE;
+        } else if (kingScoreBlack > kingScoreWhite) {
+            blackScore += KING_SCORE;
+        }
 
         score = whiteScore - blackScore;
 
