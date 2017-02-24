@@ -21,7 +21,8 @@ public class AlphaBeta {
     // necessary to check whether we are ordered to stop (with player.stopped)
     MagnusCarlsen player;
     Evaluate evaluate;
-    int statesSearched;
+    int statesSearched = 0;
+    int statesEvaluated = 0;
 
     /**
      * Does an alphabeta computation with the given alpha and beta where the
@@ -62,6 +63,7 @@ public class AlphaBeta {
         DraughtsState currState = node.getState();
         // if final depth reached, then return the value of this leaf
         if (depth <= 0 || currState.isEndState()) {
+            statesEvaluated++;
             return evaluate.evaluateState(currState);
         }
         
@@ -74,11 +76,12 @@ public class AlphaBeta {
         // This leads to better pruning.
         if (!oldMoveList.isEmpty()) {
             Move oldMove = oldMoveList.remove(0);
-            for (Move move : moves) {
-                if (move.equals(oldMove)) {
+            
+            for (int i = 0; i < moves.size(); i++) {
+                if (moves.get(i).equals(oldMove)) {
                     Move temp = moves.get(0);
-                    moves.set(0, move);
-                    move = temp;
+                    moves.set(0, moves.get(i));
+                    moves.set(i, temp);
                     break;
                 }
             }
@@ -98,11 +101,12 @@ public class AlphaBeta {
                 alpha = result;
                 node.setBestMove(move);
                 bestMoveList = childMoveList;
+                bestMoveList.add(move);
             }
             if (alpha >= beta) {
                 // append child move list to move list
                 moveList.addAll(bestMoveList);
-                return alpha;
+                return (alpha+1);
             }
         }
         // append child move list to move list
@@ -122,6 +126,7 @@ public class AlphaBeta {
         DraughtsState currState = node.getState();
         // if final depth reached, then return the value of this leaf
         if (depth <= 0) {
+            statesEvaluated++;
             return evaluate.evaluateState(currState);
         }
         
@@ -134,11 +139,11 @@ public class AlphaBeta {
         // This leads to better pruning.
         if (!oldMoveList.isEmpty()) {
             Move oldMove = oldMoveList.remove(0);
-            for (Move move : moves) {
-                if (move.equals(oldMove)) {
+            for (int i = 0; i < moves.size(); i++) {
+                if (moves.get(i).equals(oldMove)) {
                     Move temp = moves.get(0);
-                    moves.set(0, move);
-                    move = temp;
+                    moves.set(0, moves.get(i));
+                    moves.set(i, temp);
                     break;
                 }
             }
@@ -158,11 +163,12 @@ public class AlphaBeta {
                 beta = result;
                 node.setBestMove(move);
                 bestMoveList = childMoveList;
+                bestMoveList.add(move);
             }
             if (alpha >= beta) {
                 // append child move list to move list
                 moveList.addAll(bestMoveList);
-                return beta;
+                return (beta-1);
             }
         }
         // append child move list to move list

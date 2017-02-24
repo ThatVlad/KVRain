@@ -18,6 +18,7 @@ import org10x10.dam.game.Move;
 public class MagnusCarlsen extends DraughtsPlayer {
 
     private int bestValue = 0;
+    private Move bestMoveFound;
     int depthReached = 0;
     int maxSearchDepth;
     AlphaBeta alphaBeta;
@@ -29,7 +30,7 @@ public class MagnusCarlsen extends DraughtsPlayer {
     public boolean stopped;
 
     public MagnusCarlsen(int maxSearchDepth) {
-        super("best.png"); // ToDo: replace with your own icon
+        super("best.png");
         this.maxSearchDepth = maxSearchDepth;
         this.evaluate = new Evaluate(this);
         this.alphaBeta = new AlphaBeta(this, evaluate);
@@ -37,7 +38,6 @@ public class MagnusCarlsen extends DraughtsPlayer {
 
     @Override
     public Move getMove(DraughtsState s) {
-        System.err.println("Entering getMove()");
         Move bestMove = null;
         bestValue = 0;
         
@@ -45,17 +45,17 @@ public class MagnusCarlsen extends DraughtsPlayer {
         try {        
             // compute bestMove and bestValue in a call to alphabeta
             bestValue = alphaBeta(node, MIN_VALUE, MAX_VALUE, maxSearchDepth);
-            System.err.println("bestValue computed!");
+            System.err.println("Completed full search");
         } catch (AIStoppedException ex) {
-            System.err.println("AIStoppedException caught!"); 
+            System.err.println("AIStoppedException caught - search aborted prematurely"); 
         } finally {
-            System.err.println("Entered finally");
             System.err.println("Max depth searched: " + depthReached);
             System.err.println("States searched: " + alphaBeta.statesSearched);
+            System.err.println("States evaluated: " + alphaBeta.statesEvaluated);
             System.err.println("Best value found: " + bestValue);
-            // store the bestMove found uptill now
-            // NB this is not done in case of an AIStoppedException in alphaBeat()
-            bestMove = node.getBestMove();
+            
+            // set bestMove to the best move found of largest completed iteration
+            bestMove = bestMoveFound;
             
             // print the results for debugging reasons
             System.err.format(
@@ -65,7 +65,7 @@ public class MagnusCarlsen extends DraughtsPlayer {
         }
         
         if (bestMove == null) {
-            System.err.println("no valid move found!");
+            System.err.println("ERROR: No valid move found!");
             return getRandomValidMove(s);
         } else {
             return bestMove;
@@ -120,6 +120,7 @@ public class MagnusCarlsen extends DraughtsPlayer {
         //iterative deepening
         int returnValue = 0;
         alphaBeta.statesSearched = 0;
+        alphaBeta.statesEvaluated = 0;
         List<Move> oldMoveList = new ArrayList<>();
         for (int i = 1; i <= depth; i++) {
             if (stopped) {
@@ -133,7 +134,9 @@ public class MagnusCarlsen extends DraughtsPlayer {
                 returnValue = alphaBeta.alphaBetaMin(node, alpha, beta, i, depthMoveList, oldMoveList);
             }
             bestValue = returnValue;
+            bestMoveFound = node.getBestMove();
             depthReached = i;
+            
             Collections.reverse(depthMoveList);
             oldMoveList = depthMoveList;
         }
