@@ -58,7 +58,7 @@ public class AlphaBeta {
             player.stopped = false;
             throw new AIStoppedException();
         }
-        
+
         // obtain a reference to the current active state
         DraughtsState currState = node.getState();
         // if final depth reached, then return the value of this leaf
@@ -66,17 +66,35 @@ public class AlphaBeta {
             statesEvaluated++;
             return evaluate.evaluateState(currState);
         }
-        
+
         // if not final depth, then generate all possible branches
         // determine the best move and corresponding state-value
         List<Move> moves = currState.getMoves();
+
+        // if only a single move is possible, don't decrease depth and jump to next level right away
+        if (moves.size() == 1) {
+            statesSearched++;
+            Move move = moves.get(0);
+            currState.doMove(move);
+            DraughtsNode childNode = new DraughtsNode(currState);
+            List<Move> childMoveList = new ArrayList<Move>();
+            int result = alphaBetaMin(childNode, alpha, beta, depth - 1, childMoveList, oldMoveList);
+            currState.undoMove(move);
+            alpha = result;
+            node.setBestMove(move);
+            childMoveList.add(move);
+            // append child move list to move list
+            moveList.addAll(childMoveList);
+            return alpha;
+        }
+
         // if the list of old-moves is not empty yet, then continue
         // tracing the best move of the previous run by putting the old move
         // in the first position to be evaluated.
         // This leads to better pruning.
         if (!oldMoveList.isEmpty()) {
             Move oldMove = oldMoveList.remove(0);
-            
+
             for (int i = 0; i < moves.size(); i++) {
                 if (moves.get(i).equals(oldMove)) {
                     Move temp = moves.get(0);
@@ -86,9 +104,11 @@ public class AlphaBeta {
                 }
             }
         }
+
         // keep track of the moveList of the best move
         // combine it with the input moveList to get full move-history
         List<Move> bestMoveList = new ArrayList<>();
+
         //access via new for-loop
         for (Move move : moves) {
             statesSearched++;
@@ -106,7 +126,7 @@ public class AlphaBeta {
             if (alpha >= beta) {
                 // append child move list to move list
                 moveList.addAll(bestMoveList);
-                return (alpha+1);
+                return (alpha + 1);
             }
         }
         // append child move list to move list
@@ -121,7 +141,7 @@ public class AlphaBeta {
             player.stopped = false;
             throw new AIStoppedException();
         }
-        
+
         // obtain a reference to the current active state
         DraughtsState currState = node.getState();
         // if final depth reached, then return the value of this leaf
@@ -129,10 +149,28 @@ public class AlphaBeta {
             statesEvaluated++;
             return evaluate.evaluateState(currState);
         }
-        
+
         // if not final depth, then generate all possible branches
         // determine the best move and corresponding state-value
         List<Move> moves = currState.getMoves();
+
+        // if only a single move is possible, don't decrease depth and jump to next level right away
+        if (moves.size() == 1) {
+            statesSearched++;
+            Move move = moves.get(0);
+            currState.doMove(move);
+            DraughtsNode childNode = new DraughtsNode(currState);
+            List<Move> childMoveList = new ArrayList<Move>();
+            int result = alphaBetaMin(childNode, alpha, beta, depth - 1, childMoveList, oldMoveList);
+            currState.undoMove(move);
+            alpha = result;
+            node.setBestMove(move);
+            childMoveList.add(move);
+            // append child move list to move list
+            moveList.addAll(childMoveList);
+            return alpha;
+        }
+
         // if the list of old-moves is not empty yet, then continue
         // tracing the best move of the previous run by putting the old move
         // in the first position to be evaluated.
@@ -168,7 +206,7 @@ public class AlphaBeta {
             if (alpha >= beta) {
                 // append child move list to move list
                 moveList.addAll(bestMoveList);
-                return (beta-1);
+                return (beta - 1);
             }
         }
         // append child move list to move list
