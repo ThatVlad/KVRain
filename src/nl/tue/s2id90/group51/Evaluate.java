@@ -130,6 +130,10 @@ public class Evaluate {
             for (int col = ((row & 1) == 0) ? 1 : 0; col < 10; col += 2) {
                 int piece = pieces[row][col];
                 
+                if (piece == DraughtsState.EMPTY || piece == DraughtsState.WHITEFIELD) {
+                    continue;
+                }
+                
                 boolean man = true;
                 boolean white = true;
 

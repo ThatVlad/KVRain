@@ -16,6 +16,7 @@ import org10x10.dam.game.Move;
  */
 public class AlphaBeta {
 
+    // TODO: don't count forced capture moves as depth
     // reference to the player who created this AlphaBeta
     // necessary to check whether we are ordered to stop (with player.stopped)
     MagnusCarlsen player;
