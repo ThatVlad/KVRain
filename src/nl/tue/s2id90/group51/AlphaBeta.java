@@ -62,14 +62,23 @@ public class AlphaBeta {
         // obtain a reference to the current active state
         DraughtsState currState = node.getState();
         // if final depth reached, then return the value of this leaf
-        if (depth <= 0 || currState.isEndState()) {
+        if (currState.isEndState()) {
             statesEvaluated++;
             return evaluate.evaluateState(currState);
         }
-
+        
         // if not final depth, then generate all possible branches
         // determine the best move and corresponding state-value
         List<Move> moves = currState.getMoves();
+        
+        if (depth <= 0) {
+            if (!moves.get(0).isCapture()) {
+                statesEvaluated++;
+                return evaluate.evaluateState(currState);
+            } else {
+                depth++;
+            }
+        }
 
         // if only a single move is possible, don't decrease depth and jump to next level right away
         if (moves.size() == 1) {

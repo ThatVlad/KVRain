@@ -23,7 +23,7 @@ public class Evaluate {
 
     private static final int MAN_SCORE = 15;
     private static final int KING_SCORE = 50;
-    private static final int ADJACENT_SCORE = 1;
+    private static final int ADJACENT_SCORE = 2;
     private static final int MOVABLE_SCORE = 1;
 
     /**
@@ -149,7 +149,7 @@ public class Evaluate {
 
         score = whiteScore - blackScore;
 
-        return score;
+        return score*100;
     }
 
     /**
