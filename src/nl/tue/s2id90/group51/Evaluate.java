@@ -46,9 +46,7 @@ public class Evaluate {
         int movableScoreWhite = 0;
         int movableScoreBlack = 0;
 
-        // Get the state after forced capture moves
-        // TODO: gwn overslaan in alpha-beta en dan naar laatste gaan?
-        //DraughtsState stateToCheck = findStateToCheck(state);
+        // Get the state
         DraughtsState stateToCheck = state;
 
         // Check for winning state
