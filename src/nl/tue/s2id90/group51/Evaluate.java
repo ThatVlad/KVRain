@@ -155,7 +155,7 @@ public class Evaluate {
     /**
      * Calculates the score for the position of the pieces
      *
-     * Maximum of 15;
+     * Maximum of 6 + 9 = 15;
      */
     private int calculatePositionScore(int row, int col, boolean white, boolean king) {
         int score = 0;
