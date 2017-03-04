@@ -215,31 +215,6 @@ public class Evaluate {
         return score;
     }
 
-    /**
-     * Calculates the score for the number of moves that can be done
-     */
-    private int calculateMovableScore(int[] pieces, int position, boolean white) {
-        int movableScore = 0;
-        return movableScore;
-    }
-
-    /**
-     * Checks if a given move is possible
-     */
-    private boolean isMovePossible(int[] pieces, int position, boolean position1, int move, boolean white) {
-        return false;
-    }
-
-    private boolean contains(int[] array, int value) {
-        for (int i = 0; i < array.length; i++) {
-            if (array[i] == value) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     /*
     Piece       Score
     Own Man     1
