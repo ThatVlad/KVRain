@@ -127,7 +127,7 @@ public class Evaluate {
                     break;
                 }
             }
-            for (int row = ((col & 1) == 0 ? 9 : 8); row < BOARDSIZE; row -= 2) {
+            for (int row = ((col & 1) == 0 ? 9 : 8); row > 0; row -= 2) {
                 if (pieces[row][col] == DraughtsState.BLACKPIECE) {
                     formationScoreBlack += calculateFormationScore(pieces, row, col, false);
                     break;
@@ -291,7 +291,7 @@ public class Evaluate {
             // Double for loop for the cone below initial position
             for (row++; row < BOARDSIZE; row++) {
                 colCount++;
-                for (col = originalCol - colCount; col <= originalCol + colCount; col += 2) {
+                for (col = Math.min(originalCol - colCount, 0); col <= originalCol + colCount && col < BOARDSIZE; col += 2) {
                     // Check if there is a white piece in the cone
                     int piece = pieces[row][col];
                     if (piece == DraughtsState.WHITEPIECE || piece == DraughtsState.WHITEKING) {
@@ -304,7 +304,7 @@ public class Evaluate {
             // Double for loop for the cone above initial position
             for (row--; row >= 0; row--) {
                 colCount++;
-                for (col = originalCol - colCount; col <= originalCol + colCount; col += 2) {
+                for (col = Math.min(originalCol - colCount, 0); col <= originalCol + colCount && col < BOARDSIZE; col += 2) {
                     // Check if there is a black piece in the cone
                     int piece = pieces[row][col];
                     if (piece == DraughtsState.BLACKPIECE || piece == DraughtsState.BLACKKING) {
