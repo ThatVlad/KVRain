@@ -21,6 +21,13 @@ public class MagnusCarlsen extends DraughtsPlayer {
     private Move bestMoveFound;
     int depthReached = 0;
     int maxSearchDepth;
+    
+    // variables used to test usefulness of moveLists
+    int totDepthReached;
+    int totStatesSearched;
+    int turnCount;
+    boolean useMoveLists = true;
+    
     AlphaBeta alphaBeta;
     Evaluate evaluate;
 
@@ -40,7 +47,8 @@ public class MagnusCarlsen extends DraughtsPlayer {
     public Move getMove(DraughtsState s) {
         Move bestMove = null;
         bestValue = 0;
-        
+        turnCount++;
+        System.err.println("===============================");
         DraughtsNode node = new DraughtsNode(s);    // the root of the search tree
         try {        
             // compute bestMove and bestValue in a call to alphabeta
@@ -49,8 +57,13 @@ public class MagnusCarlsen extends DraughtsPlayer {
         } catch (AIStoppedException ex) {
             System.err.println("AIStoppedException caught - search aborted prematurely"); 
         } finally {
+            System.err.println("Turncount: " + turnCount);
             System.err.println("Max depth searched: " + depthReached);
+            totDepthReached += depthReached;
+            System.err.println("Tot depth searched: " + totDepthReached);
             System.err.println("States searched: " + alphaBeta.statesSearched);
+            totStatesSearched += alphaBeta.statesSearched;
+            System.err.println("Tot states searched: " + totStatesSearched);
             System.err.println("States evaluated: " + alphaBeta.statesEvaluated);
             System.err.println("Best value found: " + bestValue);
             
@@ -119,6 +132,7 @@ public class MagnusCarlsen extends DraughtsPlayer {
             throws AIStoppedException {
         //iterative deepening
         int returnValue = 0;
+        depthReached = 0;
         alphaBeta.statesSearched = 0;
         alphaBeta.statesEvaluated = 0;
         List<Move> oldMoveList = new ArrayList<>();
@@ -137,8 +151,10 @@ public class MagnusCarlsen extends DraughtsPlayer {
             bestMoveFound = node.getBestMove();
             depthReached = i;
             
-            Collections.reverse(depthMoveList);
-            oldMoveList = depthMoveList;
+            if (useMoveLists) {
+                Collections.reverse(depthMoveList);
+                oldMoveList = depthMoveList;
+            }
         }
         return returnValue;
     }
