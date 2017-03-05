@@ -23,8 +23,9 @@ public class Evaluate {
 
     private static final int MAN_SCORE = 15;
     private static final int KING_SCORE = 50;
-    private static final int ADJACENT_SCORE = 2;
-    private static final int MOVABLE_SCORE = 1;
+    private static final int ADJACENT_SCORE = 3;
+    private static final int FORMATION_SCORE = 3;
+    private static final int FORMATION_BONUS_SCORE = 1;
 
     /**
      * Evaluates the state.
@@ -43,8 +44,8 @@ public class Evaluate {
         int positionScoreBlack = 0;
         int surroundingScoreWhite = 0;
         int surroundingScoreBlack = 0;
-        int movableScoreWhite = 0;
-        int movableScoreBlack = 0;
+        int formationScoreWhite = 0;
+        int formationScoreBlack = 0;
 
         // Get the state
         DraughtsState stateToCheck = state;
@@ -61,17 +62,20 @@ public class Evaluate {
 
         int[][] pieces = new int[BOARDSIZE][BOARDSIZE];
 
-        // Get all pieces
+        // Initialize all pieces
         for (int row = 0; row < BOARDSIZE; row++) {
             for (int col = ((row & 1) == 0) ? 1 : 0; col < BOARDSIZE; col += 2) {
                 pieces[row][col] = stateToCheck.getPiece(row, col);
             }
         }
 
+        // Loop through all pieces
         for (int row = 0; row < BOARDSIZE; row++) {
             for (int col = ((row & 1) == 0) ? 1 : 0; col < BOARDSIZE; col += 2) {
+                // Get piece on position
                 int piece = pieces[row][col];
 
+                // Skip if empty
                 if (piece == DraughtsState.EMPTY || piece == DraughtsState.WHITEFIELD) {
                     continue;
                 }
@@ -110,27 +114,37 @@ public class Evaluate {
                 } else {
                     surroundingScoreBlack += surroundingScore;
                 }
-
-                // Check for possible moves
-//                int movableScore = calculateMovableScore(pieces, position, white);
-//                if (movableScore != 0) {
-//                    if (white) {
-//                        movableScoreWhite += movableScore;
-//                    } else {
-//                        movableScoreBlack += movableScore;
-//                    }
-//                }
+                
+            }
+        }
+        
+        // Check possible formations for score
+        // Get the furthest ahead piece per color for each column
+        for (int col = 0; col < BOARDSIZE; col++) {
+            for (int row = ((col & 1) == 0 ? 1 : 0); row < BOARDSIZE; row += 2) {
+                if (pieces[row][col] == DraughtsState.WHITEPIECE) {
+                    formationScoreWhite += calculateFormationScore(pieces, row, col, true);
+                    break;
+                }
+            }
+            for (int row = ((col & 1) == 0 ? 9 : 8); row < BOARDSIZE; row -= 2) {
+                if (pieces[row][col] == DraughtsState.BLACKPIECE) {
+                    formationScoreBlack += calculateFormationScore(pieces, row, col, false);
+                    break;
+                }
             }
         }
 
         int whiteScore = pieceScoreWhite 
                 + kingScoreWhite
                 + positionScoreWhite 
-                + surroundingScoreWhite;
+                + surroundingScoreWhite
+                + formationScoreWhite;
         int blackScore = pieceScoreBlack 
                 + kingScoreBlack
                 + positionScoreBlack 
-                + surroundingScoreBlack;
+                + surroundingScoreBlack
+                + formationScoreBlack;
         
         // Give an advantage to the color with more pieces
         if (pieceScoreWhite > pieceScoreBlack) {
@@ -214,6 +228,97 @@ public class Evaluate {
 
         return score;
     }
+    
+    /**
+     * Checks for possible formations of 3 pieces in a row.
+     * Adds score based on number of possibilities until a maximum of 3.
+     * 
+     * 
+     */
+    private int calculateFormationScore(int[][] pieces, int row, int col, boolean white) {
+        int score = 0;
+        
+        //check for row for pieces to make formation
+        int piecesLeft = checkPossiblePieces(pieces, row + 1, col - 1, white);
+        if (piecesLeft >= 2) {
+            int piecesLeftLeft;
+            piecesLeftLeft = checkPossiblePieces(pieces, row + 2, col - 3, white);
+            if (piecesLeftLeft >= 1) {
+                // Formation possible
+                score += FORMATION_SCORE;
+
+                // Bonus score if there is more than 1 possible formation
+                if (piecesLeft > 2) {
+                    score += FORMATION_BONUS_SCORE;
+                }
+                if (piecesLeftLeft > 1) {
+                    score += FORMATION_BONUS_SCORE;
+                }
+            }
+        }
+        
+        int piecesRight = checkPossiblePieces(pieces, row + 1, col - 1, white);
+        if (piecesRight >= 2) {
+            int piecesRightRight;
+            piecesRightRight = checkPossiblePieces(pieces, row + 2, col - 3, white);
+            if (piecesRightRight >= 1) {
+                // Formation possible
+                score += FORMATION_SCORE;
+
+                // Bonus score if there is more than 1 possible formation
+                if (piecesRight > 2) {
+                    score += FORMATION_BONUS_SCORE;
+                }
+                if (piecesRightRight > 1) {
+                    score += FORMATION_BONUS_SCORE;
+                }
+            }
+        }
+        
+        return score;
+    }
+    
+    /**
+    * Checks for a certain number of pieces of a certain color in a cone above/below a position.
+    */
+    private int checkPossiblePieces(int[][] pieces, int row, int col, boolean white) {
+        int pieceCount = 0;
+        
+        int originalCol = col;
+        int colCount = 0; // Increases width of cone
+        
+        if (white) {
+            // Double for loop for the cone below initial position
+            for (row++; row < BOARDSIZE; row++) {
+                colCount++;
+                for (col = originalCol - colCount; col <= originalCol + colCount; col += 2) {
+                    // Check if there is a white piece in the cone
+                    int piece = pieces[row][col];
+                    if (piece == DraughtsState.WHITEPIECE || piece == DraughtsState.WHITEKING) {
+                        // Increment counter
+                        pieceCount++;
+                    }
+                }
+            }
+        } else {
+            // Double for loop for the cone above initial position
+            for (row--; row >= 0; row--) {
+                colCount++;
+                for (col = originalCol - colCount; col <= originalCol + colCount; col += 2) {
+                    // Check if there is a black piece in the cone
+                    int piece = pieces[row][col];
+                    if (piece == DraughtsState.BLACKPIECE || piece == DraughtsState.BLACKKING) {
+                        // Increment counter
+                        pieceCount++;
+                    }
+                }
+            }
+        }
+        
+        return pieceCount;
+    }
+    
+    
 
     /*
     Piece       Score
