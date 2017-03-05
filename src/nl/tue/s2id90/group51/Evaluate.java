@@ -120,7 +120,8 @@ public class Evaluate {
         
         // Check possible formations for score
         // Get the furthest ahead piece per color for each column
-        for (int col = 0; col < BOARDSIZE; col++) {
+        // First and last 2 columns are not checked to prefer center play more
+        for (int col = 2; col < BOARDSIZE - 2; col++) {
             for (int row = ((col & 1) == 0 ? 1 : 0); row < BOARDSIZE; row += 2) {
                 if (pieces[row][col] == DraughtsState.WHITEPIECE) {
                     formationScoreWhite += calculateFormationScore(pieces, row, col, true);
@@ -161,7 +162,7 @@ public class Evaluate {
 
         score = whiteScore - blackScore;
 
-        return score*100;
+        return score;
     }
 
     /**
@@ -291,7 +292,7 @@ public class Evaluate {
             // Double for loop for the cone below initial position
             for (row++; row < BOARDSIZE; row++) {
                 colCount++;
-                for (col = Math.min(originalCol - colCount, 0); col <= originalCol + colCount && col < BOARDSIZE; col += 2) {
+                for (col = Math.max(originalCol - colCount, 0); col <= originalCol + colCount && col < BOARDSIZE; col += 2) {
                     // Check if there is a white piece in the cone
                     int piece = pieces[row][col];
                     if (piece == DraughtsState.WHITEPIECE || piece == DraughtsState.WHITEKING) {
@@ -304,7 +305,7 @@ public class Evaluate {
             // Double for loop for the cone above initial position
             for (row--; row >= 0; row--) {
                 colCount++;
-                for (col = Math.min(originalCol - colCount, 0); col <= originalCol + colCount && col < BOARDSIZE; col += 2) {
+                for (col = Math.max(originalCol - colCount, 0); col <= originalCol + colCount && col < BOARDSIZE; col += 2) {
                     // Check if there is a black piece in the cone
                     int piece = pieces[row][col];
                     if (piece == DraughtsState.BLACKPIECE || piece == DraughtsState.BLACKKING) {
