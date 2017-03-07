@@ -23,8 +23,9 @@ public class Evaluate {
 
     private static final int MAN_SCORE = 15;
     private static final int KING_SCORE = 50;
-    private static final int ADJACENT_SCORE = 3;
+    private static final int ADJACENT_SCORE = 2;
     private static final int FORMATION_SCORE = 3;
+    private static final int FORMATION_POSSIBLE_SCORE = 2;
     private static final int FORMATION_BONUS_SCORE = 1;
 
     /**
@@ -135,7 +136,7 @@ public class Evaluate {
                 }
             }
         }
-
+        
         int whiteScore = pieceScoreWhite 
                 + kingScoreWhite
                 + positionScoreWhite 
@@ -236,17 +237,27 @@ public class Evaluate {
      * 
      * 
      */
-    private int calculateFormationScore(int[][] pieces, int row, int col, boolean white) {
+    private int calculateFormationScore(int[][] pieces, final int row, final int col, boolean white) {
         int score = 0;
         
+        int rowAdjustment = (white) ? 1 : -1;
+        
         //check for row for pieces to make formation
-        int piecesLeft = checkPossiblePieces(pieces, row + 1, col - 1, white);
+        int piecesLeft = checkPossiblePieces(pieces, row + rowAdjustment, col - 1, white);
         if (piecesLeft >= 2) {
             int piecesLeftLeft;
-            piecesLeftLeft = checkPossiblePieces(pieces, row + 2, col - 3, white);
+            piecesLeftLeft = checkPossiblePieces(pieces, row + 2 * rowAdjustment, col - 2, white);
             if (piecesLeftLeft >= 1) {
                 // Formation possible
-                score += FORMATION_SCORE;
+                score += FORMATION_POSSIBLE_SCORE;
+                
+                // Formation is there
+                if (pieces[row + rowAdjustment][col - 1] == DraughtsState.WHITEPIECE && 
+                        pieces[row + 2 * rowAdjustment][col - 2] == DraughtsState.WHITEPIECE && white ||
+                        pieces[row + rowAdjustment][col - 1] == DraughtsState.BLACKPIECE && 
+                        pieces[row + 2 * rowAdjustment][col - 2] == DraughtsState.BLACKPIECE && !white) {
+                    score += FORMATION_SCORE;
+                }
 
                 // Bonus score if there is more than 1 possible formation
                 if (piecesLeft > 2) {
@@ -258,13 +269,21 @@ public class Evaluate {
             }
         }
         
-        int piecesRight = checkPossiblePieces(pieces, row + 1, col - 1, white);
+        int piecesRight = checkPossiblePieces(pieces, row + rowAdjustment, col + 1, white);
         if (piecesRight >= 2) {
             int piecesRightRight;
-            piecesRightRight = checkPossiblePieces(pieces, row + 2, col - 3, white);
+            piecesRightRight = checkPossiblePieces(pieces, row + 2 * rowAdjustment, col + 2, white);
             if (piecesRightRight >= 1) {
                 // Formation possible
-                score += FORMATION_SCORE;
+                score += FORMATION_POSSIBLE_SCORE;
+                
+                // Formation is there
+                if (pieces[row + rowAdjustment][col + 1] == DraughtsState.WHITEPIECE && 
+                        pieces[row + 2 * rowAdjustment][col + 2] == DraughtsState.WHITEPIECE && white ||
+                        pieces[row + rowAdjustment][col + 1] == DraughtsState.BLACKPIECE && 
+                        pieces[row + 2 * rowAdjustment][col + 2] == DraughtsState.BLACKPIECE && !white) {
+                    score += FORMATION_SCORE;
+                }
 
                 // Bonus score if there is more than 1 possible formation
                 if (piecesRight > 2) {
@@ -290,30 +309,33 @@ public class Evaluate {
         
         if (white) {
             // Double for loop for the cone below initial position
-            for (row++; row < BOARDSIZE; row++) {
-                colCount++;
+            // Includes original position
+            for (; row < BOARDSIZE; row++) {
                 for (col = Math.max(originalCol - colCount, 0); col <= originalCol + colCount && col < BOARDSIZE; col += 2) {
                     // Check if there is a white piece in the cone
                     int piece = pieces[row][col];
-                    if (piece == DraughtsState.WHITEPIECE || piece == DraughtsState.WHITEKING) {
+                    if (piece == DraughtsState.WHITEPIECE) {
                         // Increment counter
                         pieceCount++;
                     }
                 }
+                
+                colCount++;
             }
         } else {
             // Double for loop for the cone above initial position
-            for (row--; row >= 0; row--) {
-                colCount++;
+            for (; row >= 0; row--) {
                 for (col = Math.max(originalCol - colCount, 0); col <= originalCol + colCount && col < BOARDSIZE; col += 2) {
                     // Check if there is a black piece in the cone
                     int piece = pieces[row][col];
-                    if (piece == DraughtsState.BLACKPIECE || piece == DraughtsState.BLACKKING) {
+                    if (piece == DraughtsState.BLACKPIECE) {
                         // Increment counter
                         pieceCount++;
                     }
                 }
             }
+            
+            colCount++;
         }
         
         return pieceCount;

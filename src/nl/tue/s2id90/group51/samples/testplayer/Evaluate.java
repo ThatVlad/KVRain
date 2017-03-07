@@ -148,7 +148,7 @@ public class Evaluate {
 
         score = whiteScore - blackScore;
 
-        return score*100;
+        return score;
     }
 
     /**

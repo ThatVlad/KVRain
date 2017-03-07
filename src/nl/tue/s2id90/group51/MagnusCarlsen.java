@@ -45,6 +45,8 @@ public class MagnusCarlsen extends DraughtsPlayer {
 
     @Override
     public Move getMove(DraughtsState s) {
+        System.err.println("Current state score: " + evaluate.evaluateState(s));
+        
         Move bestMove = null;
         bestValue = 0;
         turnCount++;
