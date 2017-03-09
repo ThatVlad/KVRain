@@ -21,13 +21,12 @@ public class MagnusCarlsen extends DraughtsPlayer {
     private Move bestMoveFound;
     int depthReached = 0;
     int maxSearchDepth;
-    
+
     // variables used to test usefulness of moveLists
     int totDepthReached;
     int totStatesSearched;
     int turnCount;
-    boolean useMoveLists = true;
-    
+
     AlphaBeta alphaBeta;
     Evaluate evaluate;
 
@@ -46,18 +45,18 @@ public class MagnusCarlsen extends DraughtsPlayer {
     @Override
     public Move getMove(DraughtsState s) {
         System.err.println("Current state score: " + evaluate.evaluateState(s));
-        
+
         Move bestMove = null;
         bestValue = 0;
         turnCount++;
         System.err.println("===============================");
         DraughtsNode node = new DraughtsNode(s);    // the root of the search tree
-        try {        
+        try {
             // compute bestMove and bestValue in a call to alphabeta
             bestValue = alphaBeta(node, MIN_VALUE, MAX_VALUE, maxSearchDepth);
             System.err.println("Completed full search");
         } catch (AIStoppedException ex) {
-            System.err.println("AIStoppedException caught - search aborted prematurely"); 
+            System.err.println("AIStoppedException caught - search aborted prematurely");
         } finally {
             System.err.println("Turncount: " + turnCount);
             System.err.println("Max depth searched: " + depthReached);
@@ -68,17 +67,17 @@ public class MagnusCarlsen extends DraughtsPlayer {
             System.err.println("Tot states searched: " + totStatesSearched);
             System.err.println("States evaluated: " + alphaBeta.statesEvaluated);
             System.err.println("Best value found: " + bestValue);
-            
+
             // set bestMove to the best move found of largest completed iteration
             bestMove = bestMoveFound;
-            
+
             // print the results for debugging reasons
             System.err.format(
                     "%s: depth= %2d, best move = %5s, value=%d\n",
                     this.getClass().getSimpleName(), maxSearchDepth, bestMove, bestValue
             );
         }
-        
+
         if (bestMove == null) {
             System.err.println("ERROR: No valid move found!");
             return getRandomValidMove(s);
@@ -152,11 +151,9 @@ public class MagnusCarlsen extends DraughtsPlayer {
             bestValue = returnValue;
             bestMoveFound = node.getBestMove();
             depthReached = i;
-            
-            if (useMoveLists) {
-                Collections.reverse(depthMoveList);
-                oldMoveList = depthMoveList;
-            }
+
+            Collections.reverse(depthMoveList);
+            oldMoveList = depthMoveList;
         }
         return returnValue;
     }
