@@ -70,15 +70,6 @@ public class AlphaBeta {
         // determine the best move and corresponding state-value
         List<Move> moves = currState.getMoves();
 
-        if (depth <= 0) {
-            if (!moves.get(0).isCapture()) {
-                statesEvaluated++;
-                return evaluate.evaluateState(currState);
-            } else {
-                depth++;
-            }
-        }
-
         // if the list of old-moves is not empty yet, then continue
         // tracing the best move of the previous run by putting the old move
         // in the first position to be evaluated.
@@ -95,21 +86,18 @@ public class AlphaBeta {
                 }
             }
         }
-
-        // if only a single move is possible, don't decrease depth and jump to next level right away
-        if (moves.size() == 1) {
+        
+        if (depth <= 0) {
+            if (!moves.get(0).isCapture()) {
+                statesEvaluated++;
+                return evaluate.evaluateState(currState);
+            } else {
+                depth++;
+            }
+        } else if (moves.size() == 1) {
+            // if only a single move is possible, don't decrease depth and jump to next level right away
             statesSearched++;
-            Move move = moves.get(0);
-            currState.doMove(move);
-            DraughtsNode childNode = new DraughtsNode(currState);
-            List<Move> childMoveList = new ArrayList<Move>();
-            alpha = alphaBetaMin(childNode, alpha, beta, depth - 1, childMoveList, oldMoveList);
-            currState.undoMove(move);
-            node.setBestMove(move);
-            childMoveList.add(move);
-            // append child move list to move list
-            moveList.addAll(childMoveList);
-            return alpha;
+            depth++;
         }
 
         // keep track of the moveList of the best move
@@ -161,15 +149,6 @@ public class AlphaBeta {
         // determine the best move and corresponding state-value
         List<Move> moves = currState.getMoves();
 
-        if (depth <= 0) {
-            if (!moves.get(0).isCapture()) {
-                statesEvaluated++;
-                return evaluate.evaluateState(currState);
-            } else {
-                depth++;
-            }
-        }
-
         // if the list of old-moves is not empty yet, then continue
         // tracing the best move of the previous run by putting the old move
         // in the first position to be evaluated.
@@ -186,20 +165,17 @@ public class AlphaBeta {
             }
         }
 
-        // if only a single move is possible, don't decrease depth and jump to next level right away
-        if (moves.size() == 1) {
+        if (depth <= 0) {
+            if (!moves.get(0).isCapture()) {
+                statesEvaluated++;
+                return evaluate.evaluateState(currState);
+            } else {
+                depth++;
+            }
+        } else if (moves.size() == 1) {
+            // if only a single move is possible, don't decrease depth and jump to next level right away
             statesSearched++;
-            Move move = moves.get(0);
-            currState.doMove(move);
-            DraughtsNode childNode = new DraughtsNode(currState);
-            List<Move> childMoveList = new ArrayList<Move>();
-            beta = alphaBetaMax(childNode, alpha, beta, depth - 1, childMoveList, oldMoveList);
-            currState.undoMove(move);
-            node.setBestMove(move);
-            childMoveList.add(move);
-            // append child move list to move list
-            moveList.addAll(childMoveList);
-            return beta;
+            depth++;
         }
 
         // keep track of the moveList of the best move
@@ -229,5 +205,4 @@ public class AlphaBeta {
         moveList.addAll(bestMoveList);
         return beta;
     }
-
 }
